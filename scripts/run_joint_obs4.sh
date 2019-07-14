@@ -27,8 +27,8 @@ python3 scripts/train.py \
   --d_steps 2 \
   --checkpoint_every 10 \
   --print_every 50 \
-  --num_iterations 24000 \
-  --num_epochs 1200 \
+  --num_iterations 10000 \
+  --num_epochs 200 \
   --pooling_type 'pool_net' \
   --clipping_threshold_g 1.5 \
   --best_k 1 \

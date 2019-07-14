@@ -713,4 +713,5 @@ def cal_fde(
 
 if __name__ == '__main__':
     args = parser.parse_args()
+    print("cude available " + str(torch.cuda.is_available()))
     main(args)

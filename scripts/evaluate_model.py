@@ -9,6 +9,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from attrdict import AttrDict
+torch.backends.cudnn.benchmark = True
 
 from sgan.data.loader import data_loader
 from sgan.models import TrajectoryGenerator, TrajectoryDiscriminator, TrajectoryIntention
@@ -19,8 +20,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model_path', type=str)
 parser.add_argument('--num_samples', default=20, type=int)
 parser.add_argument('--dset_type', default='test', type=str)
-parser.add_argument('--best', default=True, type=bool)
-parser.add_argument('--plot', default=False, type=bool)
+parser.add_argument('--best', default=False, type=bool)
+parser.add_argument('--plot', default=True, type=bool)
 parser.add_argument('--plot_dir', default='./plots/trajs/')
 
 
@@ -232,16 +233,19 @@ def evaluate(
 
 def main(args):
     if os.path.isdir(args.model_path):
+        
         filenames = os.listdir(args.model_path)
         filenames.sort()
         paths = [
             os.path.join(args.model_path, file_) for file_ in filenames
         ]
-    else:
+  
+    else: 
         paths = [args.model_path]
 
     for path in paths:
-        checkpoint = torch.load(path)
+
+        checkpoint = torch.load(path, map_location='cuda:0')
         force_generator = get_force_generator(checkpoint, best=args.best)
         intention_generator = get_intention_generator(checkpoint, best=args.best)
         discriminator = get_discriminator(checkpoint, best=args.best)
@@ -259,5 +263,6 @@ def main(args):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1'
+    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+    print(torch.cuda.is_available())
     main(args)
