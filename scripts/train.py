@@ -146,7 +146,13 @@ def main(args):
     logger.info(
         'There are {} iterations per epoch'.format(iterations_per_epoch)
     )
-    
+    logger.info(
+        'There are {} iterations'.format(args.num_iterations)
+    )
+    logger.info(
+        'There are {} epochs'.format(args.num_epochs)
+    )
+
     # Prepare to plot all metrics
     if not os.path.exists(args.plot_dir):
         os.makedirs(args.plot_dir)
@@ -205,7 +211,7 @@ def main(args):
     d_loss_fn = gan_d_loss
 
     optimizer_g = optim.Adam(
-        list(attention_generator.parameters()), 
+        list(attention_generator.parameters()),
         lr=args.g_learning_rate
     )
     optimizer_d = optim.Adam(
@@ -443,7 +449,7 @@ def generator_step(
     """
     Re-sample random length observation (prepend) and random length prediction
     """
-    
+
     old_obs_len = obs_traj.shape[0]
     old_pred_len = pred_traj_gt.shape[0]
 
@@ -505,13 +511,13 @@ def generator_step(
         for _ in range(args.best_k):
             gt_rel = None
             pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, seq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
-    
+
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
-            
+
             # Optimize delta position instead of whole trajectory
             # Is this really needed?
             if args.l2_loss_weight > 0:
-                g_l2_loss_rel.append(args.l2_loss_weight * 
+                g_l2_loss_rel.append(args.l2_loss_weight *
                         length_normalized_l2_loss(pred_traj_fake_rel, pred_traj_gt_rel))
 
 
@@ -529,20 +535,20 @@ def generator_step(
                         distance -= pred_traj_fake[:,t,:].view(-1,1,2)
                         distance = safe_dist**2 - torch.sum(distance**2, dim=2)
                         resist_loss = distance[distance > 0.]
-                        
+
                         if resist_loss.numel() > 0:
                             resist_loss = torch.sum(resist_loss) / resist_loss.numel()
                             sum_resist_loss += args.resist_loss_weight*resist_loss
 
-    
+
         g_l2_loss_sum_rel = torch.zeros(1).to(pred_traj_gt)
         if args.l2_loss_weight > 0:
             g_l2_loss_rel = torch.stack(g_l2_loss_rel, dim=1) # [Num_ped, best_k]
-            
+
             for start, end in seq_start_end.data:
                 _g_l2_loss_rel = g_l2_loss_rel[start:end]
                 _g_l2_loss_rel = torch.sum(_g_l2_loss_rel, dim=0) # [k]
-                # Balance losses by number of ped in each batch, 
+                # Balance losses by number of ped in each batch,
                 # only optimize the best one
                 _g_l2_loss_rel = torch.min(_g_l2_loss_rel) / torch.sum(
                     loss_mask[start:end])
@@ -605,7 +611,7 @@ def check_accuracy(
             fde, fde_l, fde_nl = cal_fde(
                 pred_traj_gt, pred_traj_fake, linear_ped, non_linear_ped
             )
-            
+
             #################### RESIST LOSS ###################
             for start, end in seq_start_end.data:
                 for t in range(start, end):
@@ -618,7 +624,7 @@ def check_accuracy(
                     distance -= pred_traj_fake[:,t,:].view(-1,1,2)
                     distance = safe_dist**2 - torch.sum(distance**2, dim=2)
                     resist_loss = distance[distance > 0.]
-                    
+
                     if resist_loss.numel() > 0:
                         resist_count += resist_loss.numel()
                         resist_loss = torch.sum(resist_loss) / (args.pred_len*torch.sum(loss_mask[start:end]))
