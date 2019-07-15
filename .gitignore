@@ -1,3 +1,4 @@
 .ipynb_checkpoints
-.plots/*
-.plots
+scripts/sgan/__pycache__/*
+scripts/sgan/__pycache__
+scripts/.DS_Store

@@ -79,7 +79,7 @@ We use the same mlp options across all three components of the model.
 
 **Generator Options**: The generator takes as input all the trajectories for a given sequence and jointly predicts socially acceptable trajectories. These flags control architecture hyperparameters specific to the generator:
 - `--encoder_h_dim_g`: Integer giving the dimensions of the hidden layer in the encoder. Default is 64.
-- `--decoder_h_dim_g`: Integer giving the dimensions of the hidden layer in the decoder. Default is 64.
+- `--decoder_h_dim`: Integer giving the dimensions of the hidden layer in the decoder. Default is 64.
 - `--noise_dim`: Integer tuple giving the dimensions of the noise added to the input of the decoder. Default is None.
 - `--noise_type`: Type of noise to be added. We support two options "uniform" and "gaussian" noise. Default is "gaussian".
 - `--noise_mix_type`: The added noise can either be the same across all pedestrians or we can have a different per person noise. We support two options "global" and "ped". Default value is "ped".

@@ -450,7 +450,7 @@ def generator_step(
     Re-sample random length observation (prepend) and random length prediction
     """
 
-    old_obs_len = obs_traj.shape[0]
+    old_obs_len = obs_traj.shape[0]  # 8*999*2
     old_pred_len = pred_traj_gt.shape[0]
 
     obs_len = np.random.randint(4)+4

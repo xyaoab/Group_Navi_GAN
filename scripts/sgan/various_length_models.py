@@ -47,9 +47,9 @@ class Encoder(nn.Module):
 
         self.encoder = nn.LSTM(
             embedding_dim, h_dim, num_layers, dropout=dropout
-        )
+        ).cuda()
 
-        self.spatial_embedding = nn.Linear(2, embedding_dim)
+        self.spatial_embedding = nn.Linear(2, embedding_dim).cuda()
 
     def init_hidden(self, batch):
         return (
@@ -66,13 +66,13 @@ class Encoder(nn.Module):
         """
         # Encode observed Trajectory
         batch = obs_traj.size(1)
-        obs_traj_embedding = self.spatial_embedding(obs_traj.view(-1, 2))
+        obs_traj_embedding = self.spatial_embedding(obs_traj.view(-1, 2)) #(batch*seq) x 2
         obs_traj_embedding = obs_traj_embedding.view(
             -1, batch, self.embedding_dim
-        )
+        ) # seq x batch x 64
         state_tuple = self.init_hidden(batch)
         output, state = self.encoder(obs_traj_embedding, state_tuple)
-        final_h = state[0]
+        final_h = state[0] #1*batch*64
         return final_h
 
 
@@ -355,7 +355,7 @@ class PoolHiddenNet(nn.Module):
         self.embedding_dim = embedding_dim
 
         mlp_pre_dim = embedding_dim + h_dim
-        mlp_pre_pool_dims = [mlp_pre_dim, 512, bottleneck_dim]
+        mlp_pre_pool_dims = [mlp_pre_dim, 512, bottleneck_dim] #48 x 512x 32
 
         self.spatial_embedding = nn.Linear(2, embedding_dim)
         self.mlp_pre_pool = make_mlp(
@@ -729,69 +729,69 @@ class TrajectoryGenerator(nn.Module):
 
         return pred_traj_fake_rel
 
-    def encode_obs(self, obs_traj, obs_traj_rel, seq_start_end, aux_input=None, user_noise=None):
-        """
-        Inputs:
-        - obs_traj: Tensor of shape (obs_len, batch, 2)
-        - obs_traj_rel: Tensor of shape (obs_len, batch, 2)
-        - seq_start_end: A list of tuples which delimit sequences within batch.
-        - user_noise: Generally used for inference when you want to see
-        relation between different types of noise and outputs.
-        Output:
-        - pred_traj_rel: Tensor of shape (self.pred_len, batch, 2)
-        """
-        batch = obs_traj_rel.size(1)
-        # Encode seq
-        final_encoder_h = self.encoder(obs_traj_rel)
-        # Pool States
-        if self.pooling_type:
-            end_pos = obs_traj[-1, :, :]
-            pool_h = self.pool_net(final_encoder_h, seq_start_end, end_pos)
-            # Construct input hidden states for decoder
-            mlp_decoder_context_input = torch.cat(
-                [final_encoder_h.view(-1, self.encoder_h_dim), pool_h], dim=1)
-        else:
-            mlp_decoder_context_input = final_encoder_h.view(
-                -1, self.encoder_h_dim)
+    # def encode_obs(self, obs_traj, obs_traj_rel, seq_start_end, aux_input=None, user_noise=None):
+    #     """
+    #     Inputs:
+    #     - obs_traj: Tensor of shape (obs_len, batch, 2)
+    #     - obs_traj_rel: Tensor of shape (obs_len, batch, 2)
+    #     - seq_start_end: A list of tuples which delimit sequences within batch.
+    #     - user_noise: Generally used for inference when you want to see
+    #     relation between different types of noise and outputs.
+    #     Output:
+    #     - pred_traj_rel: Tensor of shape (self.pred_len, batch, 2)
+    #     """
+    #     batch = obs_traj_rel.size(1)
+    #     # Encode seq
+    #     final_encoder_h = self.encoder(obs_traj_rel)
+    #     # Pool States
+    #     if self.pooling_type:
+    #         end_pos = obs_traj[-1, :, :]
+    #         pool_h = self.pool_net(final_encoder_h, seq_start_end, end_pos)
+    #         # Construct input hidden states for decoder
+    #         mlp_decoder_context_input = torch.cat(
+    #             [final_encoder_h.view(-1, self.encoder_h_dim), pool_h], dim=1)
+    #     else:
+    #         mlp_decoder_context_input = final_encoder_h.view(
+    #             -1, self.encoder_h_dim)
 
-        # Add Noise
-        if self.mlp_decoder_needed():
-            noise_input = self.mlp_decoder_context(mlp_decoder_context_input)
-        else:
-            noise_input = mlp_decoder_context_input
-        decoder_h = self.add_noise(
-            noise_input, seq_start_end, aux_input=aux_input, user_noise=user_noise)
-        decoder_h = torch.unsqueeze(decoder_h, 0)
+    #     # Add Noise
+    #     if self.mlp_decoder_needed():
+    #         noise_input = self.mlp_decoder_context(mlp_decoder_context_input)
+    #     else:
+    #         noise_input = mlp_decoder_context_input
+    #     decoder_h = self.add_noise(
+    #         noise_input, seq_start_end, aux_input=aux_input, user_noise=user_noise)
+    #     decoder_h = torch.unsqueeze(decoder_h, 0)
 
-        decoder_c = torch.zeros(
-            self.num_layers, batch, self.decoder_h_dim
-        ).cuda()
+    #     decoder_c = torch.zeros(
+    #         self.num_layers, batch, self.decoder_h_dim
+    #     ).cuda()
 
-        state_tuple = (decoder_h, decoder_c)
-        last_pos = obs_traj[-1]
-        last_pos_rel = obs_traj_rel[-1]
+    #     state_tuple = (decoder_h, decoder_c)
+    #     last_pos = obs_traj[-1]
+    #     last_pos_rel = obs_traj_rel[-1]
 
-        return last_pos, last_pos_rel, state_tuple
+    #     return last_pos, last_pos_rel, state_tuple
 
-    def step_decode(self, last_pos, last_pos_rel, state_tuple, seq_start_end):
-        """
-        Inputs:
-        - last_pos: Tensor of shape (batch, 2)
-        - last_pos_rel: Tensor of shape (batch, 2)
-        - state_tuple: (hh, ch) each tensor of shape (num_layers, batch, h_dim)
-        - seq_start_end: A list of tuples which delimit sequences within batch
-        Output:
-        - pred_pos: tensor of shape (1, batch, 2)
-        """
-        rel_pos, state_tuple = self.decoder.step_forward(
-            #last_pos,
-            #last_pos_rel,
-            torch.zeros(last_pos.size()).cuda(),   # Start with zero social force
-            torch.zeros(last_pos_rel.size()).cuda(),
-            state_tuple,
-            seq_start_end,
-        )
-        return rel_pos, state_tuple
+    # def step_decode(self, last_pos, last_pos_rel, state_tuple, seq_start_end):
+    #     """
+    #     Inputs:
+    #     - last_pos: Tensor of shape (batch, 2)
+    #     - last_pos_rel: Tensor of shape (batch, 2)
+    #     - state_tuple: (hh, ch) each tensor of shape (num_layers, batch, h_dim)
+    #     - seq_start_end: A list of tuples which delimit sequences within batch
+    #     Output:
+    #     - pred_pos: tensor of shape (1, batch, 2)
+    #     """
+    #     rel_pos, state_tuple = self.decoder.step_forward(
+    #         #last_pos,
+    #         #last_pos_rel,
+    #         torch.zeros(last_pos.size()).cuda(),   # Start with zero social force
+    #         torch.zeros(last_pos_rel.size()).cuda(),
+    #         state_tuple,
+    #         seq_start_end,
+    #     )
+    #     return rel_pos, state_tuple
 
 
 class TrajectoryDiscriminator(nn.Module):
@@ -1281,7 +1281,7 @@ class LateAttentionGenerator(nn.Module):
             force_mlp_decoder_context_input = force_final_encoder_h.view(
                 -1, self.encoder_h_dim)
 
-        intention_mlp_decoder_context_input = intention_final_encoder_h.view(-1, self.encoder_h_dim)
+        intention_mlp_decoder_context_input = intention_final_encoder_h.view(-1, self.encoder_h_dim) #batch x self.encoder_h_dim
 
         # Add Noise
         if self.force_mlp_decoder_needed():
