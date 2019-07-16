@@ -2,8 +2,9 @@ mkdir ./models
 python3 scripts/train.py \
   --dataset_name 'zara1' \
   --delim tab \
+  --loader_num_workers 8 \
   --d_type 'local' \
-  --pred_len 12 \
+  --pred_len 8 \
   --encoder_h_dim_g 32 \
   --encoder_h_dim_d 64\
   --decoder_h_dim 32 \
@@ -33,10 +34,10 @@ python3 scripts/train.py \
   --clipping_threshold_g 1.5 \
   --best_k 1 \
   --gpu_num 0 \
-  --checkpoint_name benchmark_zara1_batch64_epoch500_poolnet \
+  --checkpoint_name benchmark_zara1_batch32_epoch500_poolnet \
   --restore_from_checkpoint 0\
   --output_dir './models'\
   --benchmark True\
   --spatial_dim True\
   --resist_loss_weight 1\
-  2>&1 | tee training_batch64_epoch500_poolnet.log
+  2>&1 | tee training_batch32_epoch500_poolnet.log
