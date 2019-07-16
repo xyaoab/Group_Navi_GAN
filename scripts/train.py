@@ -511,7 +511,6 @@ def generator_step(
         for _ in range(args.best_k):
             gt_rel = None
             pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, seq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
-            logger.info("pred_traj_fake_rel 514" + str(pred_traj_fake_rel.size()))
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
             # Optimize delta position instead of whole trajectory
@@ -533,6 +532,7 @@ def generator_step(
                             distance = torch.cat((pred_traj_gt[:,start:t,:], pred_traj_gt[:,t+1:end,:]), 1).clone()
 
                         distance -= pred_traj_fake[:,t,:].view(-1,1,2)
+                        logger.info("pred_traj_fake_rel 535" + str(pred_traj_fake.size()))
                         distance = safe_dist**2 - torch.sum(distance**2, dim=2)
                         resist_loss = distance[distance > 0.]
 
