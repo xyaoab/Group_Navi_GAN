@@ -523,18 +523,23 @@ def generator_step(
             ##################### scheduled RESIST LOSS ########################
             if args.resist_loss_weight > 0:
                 for start, end in seq_start_end.data:
+                    heading_mask  = get_heading_difference(obs_traj_rel, start, end).cuda()
                     for t in range(start, end):
                         if t == start:
                             distance = pred_traj_gt[:,t+1:end,:].clone()
+                            mask  = heading_mask [:, 0, 1:].clone()
                         elif t == end-1:
                             distance = pred_traj_gt[:,start:t,:].clone()
+                            mask  = heading_mask [:, -1, :-1].clone()
                         else:
                             distance = torch.cat((pred_traj_gt[:,start:t,:], pred_traj_gt[:,t+1:end,:]), 1).clone()
+                            mask = torch.cat((heading_mask[:, t-start, 0:t-start], heading_mask [:,t-start, t+1-start:]), 1).clone() # 8*seq
 
-                        distance -= pred_traj_fake[:,t,:].view(-1,1,2)
-                        #logger.info("pred_traj_fake_rel 535" + str(pred_traj_fake.size()))
-                        distance = safe_dist**2 - torch.sum(distance**2, dim=2)
+                        distance -= pred_traj_gt[:,t,:].view(-1,1,2)
+                    
+                        distance = 0.45**2 - (torch.sqrt(torch.sum(distance**2, dim=2)) + 0.15*mask)**2
                         resist_loss = distance[distance > 0.]
+                        
 
                         if resist_loss.numel() > 0:
                             resist_loss = torch.sum(resist_loss) / resist_loss.numel()
@@ -597,9 +602,7 @@ def check_accuracy(
             pred_traj_fake_rel, _ = attention_generator(
                 obs_traj, obs_traj_rel, seq_start_end, seq_len=attention_generator.pred_len, goal_input=goals_rel
             )
-            logger.info("attention_generator 600" + str(attention_generator.pred_len))
-            logger.info('pred_traj_fake_rel 601 {}'.format(pred_traj_fake_rel.size()))
-            logger.info('pred_traj_gt 602 {}'.format(pred_traj_gt.size()))
+        
             
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
@@ -617,16 +620,23 @@ def check_accuracy(
 
             #################### RESIST LOSS ###################
             for start, end in seq_start_end.data:
+                heading_mask  = get_heading_difference(obs_traj_rel, start, end).cuda()
                 for t in range(start, end):
                     if t == start:
                         distance = pred_traj_gt[:,t+1:end,:].clone()
+                        mask  = heading_mask [:, 0, 1:].clone()
                     elif t == end-1:
                         distance = pred_traj_gt[:,start:t,:].clone()
+                        mask  = heading_mask [:, -1, :-1].clone()
                     else:
                         distance = torch.cat((pred_traj_gt[:,start:t,:], pred_traj_gt[:,t+1:end,:]), 1).clone()
-                    distance -= pred_traj_fake[:,t,:].view(-1,1,2)
-                    distance = safe_dist**2 - torch.sum(distance**2, dim=2)
+                        mask = torch.cat((heading_mask[:, t-start, 0:t-start], heading_mask [:,t-start, t+1-start:]), 1).clone() # 8*seq
+
+                    distance -= pred_traj_gt[:,t,:].view(-1,1,2)
+                
+                    distance = 0.45**2 - (torch.sqrt(torch.sum(distance**2, dim=2)) + 0.15*mask)**2
                     resist_loss = distance[distance > 0.]
+       
 
                     if resist_loss.numel() > 0:
                         resist_count += resist_loss.numel()
@@ -718,6 +728,19 @@ def cal_fde(
         pred_traj_fake[-1], pred_traj_gt[-1], non_linear_ped
     )
     return fde, fde_l, fde_nl
+# get ped obs heading angle difference in cos 
+def get_heading_difference(obs_traj_rel, start, end):
+    obs_length = obs_traj_rel.size(0)
+    heading_mask = nn.init.eye_(torch.empty(end-start, end-start))
+    delta_x = obs_traj_rel[0,start:end, 0]  - obs_traj_rel[-1,start:end, 0] 
+    delta_y = obs_traj_rel[0,start:end, 1]  - obs_traj_rel[-1,start:end, 1] 
+    theta = torch.atan2(delta_x, delta_y)
+    for t in range(0,end-start-1):
+        for p in range(t+1, end-start):
+            angle = abs(torch.atan2(torch.sin(theta[t]-theta[p]), torch.cos(theta[t]-theta[p])))
+            heading_mask[t,p] = heading_mask[p,t] =torch.cos(angle)
+    mask = heading_mask.unsqueeze(0).repeat(obs_length,1,1)
+    return mask
 
 
 if __name__ == '__main__':

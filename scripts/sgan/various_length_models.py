@@ -1577,7 +1577,7 @@ class LateAttentionFullGenerator(nn.Module):
         else:
             return False
 
-    def forward(self, obs_traj, obs_traj_rel, seq_start_end, aux_input=None, user_noise=None, goal_input=None, seq_len=12, gt_rel=None):
+    def forward(self, obs_traj, obs_traj_rel, seq_start_end, aux_input=None, user_noise=None, goal_input=None, seq_len=8, gt_rel=None):
         """
         Inputs:
         - obs_traj: Tensor of shape (obs_len, batch, 2)
