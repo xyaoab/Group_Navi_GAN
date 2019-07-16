@@ -597,9 +597,9 @@ def check_accuracy(
             pred_traj_fake_rel, _ = attention_generator(
                 obs_traj, obs_traj_rel, seq_start_end, goal_input=goals_rel
             )
-            logger.info("attention_generator 600" + int(attention_generator.pred_len))
-            logger.info('pred_traj_fake_rel 601 {}'.format(pred_traj_fake_rel))
-            logger.info('pred_traj_gt 602 {}'.format(pred_traj_gt))
+            logger.info("attention_generator 600" + str(attention_generator.pred_len))
+            logger.info('pred_traj_fake_rel 601 {}'.format(pred_traj_fake_rel.size()))
+            logger.info('pred_traj_gt 602 {}'.format(pred_traj_gt.size()))
             
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
