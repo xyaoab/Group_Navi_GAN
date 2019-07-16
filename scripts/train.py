@@ -392,7 +392,7 @@ def main(args):
             if t >= args.num_iterations:
                 break
 
-
+#no called
 def discriminator_step(
     args, batch, force_generator, intention_generator, discriminator, d_loss_fn, optimizer_d
 ):
@@ -511,7 +511,7 @@ def generator_step(
         for _ in range(args.best_k):
             gt_rel = None
             pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, seq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
-
+            logger.info("pred_traj_fake_rel 514" + str(pred_traj_fake_rel.size()))
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
             # Optimize delta position instead of whole trajectory
@@ -597,7 +597,7 @@ def check_accuracy(
             pred_traj_fake_rel, _ = attention_generator(
                 obs_traj, obs_traj_rel, seq_start_end, goal_input=goals_rel
             )
-
+            logger.info("attention_generator 600" + attention_generator.pred_len)
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
             g_l2_loss_abs, g_l2_loss_rel = cal_l2_losses(
