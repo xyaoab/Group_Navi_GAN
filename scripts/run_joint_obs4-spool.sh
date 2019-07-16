@@ -22,7 +22,7 @@ python3 scripts/train.py \
   --batch_norm 0 \
   --dropout 0 \
   --timing 1 \
-  --batch_size 256 \
+  --batch_size 64 \
   --g_learning_rate 5e-3 \
   --g_steps 1 \
   --d_learning_rate 1e-3 \
@@ -30,15 +30,15 @@ python3 scripts/train.py \
   --checkpoint_every 10 \
   --print_every 50 \
   --num_iterations 10000 \
-  --num_epochs 200 \
+  --num_epochs 500 \
   --pooling_type 'spool' \
   --clipping_threshold_g 1.5 \
   --best_k 1 \
   --gpu_num 0 \
-  --checkpoint_name benchmark_zara1_7_13_batch32_epoch200_spool \
+  --checkpoint_name benchmark_zara1_batch64_epoch500_spool \
   --restore_from_checkpoint 0\
   --output_dir './models'\
   --benchmark True\
   --spatial_dim True\
   --resist_loss_weight 1\
-  2>&1 | tee training_batch256_epoch500_spool.log
+  2>&1 | tee training_batch64_epoch500_spool.log

@@ -2,3 +2,7 @@
 scripts/sgan/__pycache__/*
 scripts/sgan/__pycache__
 scripts/.DS_Store
+env/*
+env
+scripts/sgan/data/__pycache__/*
+scripts/sgan/data/__pycache__
