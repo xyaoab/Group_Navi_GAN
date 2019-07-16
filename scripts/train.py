@@ -532,7 +532,7 @@ def generator_step(
                             distance = torch.cat((pred_traj_gt[:,start:t,:], pred_traj_gt[:,t+1:end,:]), 1).clone()
 
                         distance -= pred_traj_fake[:,t,:].view(-1,1,2)
-                        logger.info("pred_traj_fake_rel 535" + str(pred_traj_fake.size()))
+                        #logger.info("pred_traj_fake_rel 535" + str(pred_traj_fake.size()))
                         distance = safe_dist**2 - torch.sum(distance**2, dim=2)
                         resist_loss = distance[distance > 0.]
 
@@ -595,7 +595,7 @@ def check_accuracy(
             loss_mask = loss_mask[:, args.obs_len:]
 
             pred_traj_fake_rel, _ = attention_generator(
-                obs_traj, obs_traj_rel, seq_start_end, goal_input=goals_rel
+                obs_traj, obs_traj_rel, seq_start_end, seq_len=attention_generator.pred_len, goal_input=goals_rel
             )
             logger.info("attention_generator 600" + str(attention_generator.pred_len))
             logger.info('pred_traj_fake_rel 601 {}'.format(pred_traj_fake_rel.size()))
