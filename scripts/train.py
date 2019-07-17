@@ -729,8 +729,10 @@ def cal_fde(
     )
     return fde, fde_l, fde_nl
 # get ped obs heading angle difference in cos 
-def get_heading_difference(obs_traj_rel, start, end):
+def get_heading_difference(obs_traj_rel, _start, _end):
     obs_length = obs_traj_rel.size(0)
+    start = _start.item()
+    end = _end.item()
     heading_mask = nn.init.eye_(torch.empty(end-start, end-start))
     delta_x = obs_traj_rel[0,start:end, 0]  - obs_traj_rel[-1,start:end, 0] 
     delta_y = obs_traj_rel[0,start:end, 1]  - obs_traj_rel[-1,start:end, 1] 
