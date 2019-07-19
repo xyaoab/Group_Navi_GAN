@@ -19,11 +19,43 @@ Dataset: zara1, Pred Len: 8, D_real: 0.25/0.32, D_fake: 0.24/0.32
 ###############
 /headingloss_zara1_batch32_epoch500_poolnet_with_model.pt
 20 samples
-Dataset: zara1, Pred Len: 8, ADE: 0.29, FDE: 0.69
-Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.32/0.31
-Dataset: zara1, Pred Len: 8, ADE: 0.33, FDE: 0.68
-Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.34/0.30
-
+Dataset: zara1, Pred Len: 8, ADE: 0.20, FDE: 0.42
+Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.32/0.32
 1 sample
-taset: zara1, Pred Len: 8, ADE: 0.23, FDE: 0.50
-Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.33/0.32
+Dataset: zara1, Pred Len: 8, ADE: 0.30, FDE: 0.80
+Dataset: zara1, Pred Len: 8, D_real: 0.11/0.11, D_fake: 0.11/0.12
+
+
+/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+20 samples
+Dataset: zara1, Pred Len: 8, ADE: 0.35, FDE: 0.89
+Dataset: zara1, Pred Len: 8, D_real: 0.11/0.11, D_fake: 0.11/0.12
+
+
+
+
+
+[INFO: evaluate.py:  216]: ade is 
+[tensor(478.9462, device='cuda:0'),  [tensor(596.0121, device='cuda:0'),
+tensor(403.8883, device='cuda:0'),   tensor(530.6638, device='cuda:0')]
+tensor(350.6739, device='cuda:0'),      (504.3097, 
+tensor(300.9169, device='cuda:0'),      458.3665
+tensor(430.9913, device='cuda:0'),      (800.2414, 
+tensor(264.7654, device='cuda:0'),      (334.5292,
+tensor(934.3332, device='cuda:0'),         1252.2443
+tensor(328.8079, device='cuda:0'),      538.7496, 
+tensor(361.9761, device='cuda:0'),      (712.5109
+tensor(440.3045, device='cuda:0'),      627.7155
+tensor(373.3747, device='cuda:0')]      (468.1492,
+[INFO: evaluate.py:  217]: fde is [
+    tensor(97.2129, device='cuda:0'),   143.4999, device='cuda:0'),
+    tensor(107.0368, device='cuda:0'),  tensor(140.4629
+    tensor(90.4427, device='cuda:0'),   148.4693
+    tensor(76.5180, device='cuda:0'),      126.0977
+    tensor(124.6855, device='cuda:0'),  (235.8964
+    tensor(73.9266, device='cuda:0'),   (99.7560, 
+    tensor(229.7962, device='cuda:0'),  363.7411,
+    tensor(89.3427, device='cuda:0'),   158.2976
+    tensor(123.5209, device='cuda:0'), 226.2213, 
+    tensor(110.6908, device='cuda:0'),  172.4714
+    tensor(86.0951, device='cuda:0')]   120.9638
