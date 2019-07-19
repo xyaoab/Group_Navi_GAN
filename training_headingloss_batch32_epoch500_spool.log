@@ -1,0 +1,958 @@
+[INFO: train.py:  131]: Initializing train dataset
+[INFO: train.py:  133]: Initializing val dataset
+[INFO: train.py:  147]: There are 21.03125 iterations per epoch
+[INFO: train.py:  150]: There are 10515 iterations
+[INFO: train.py:  153]: There are 500 epochs
+[INFO: train.py:  190]: Here is the late-attention generator:
+[INFO: train.py:  191]: LateAttentionFullGenerator(
+  (intention_encoder): Encoder(
+    (encoder): LSTM(16, 32)
+    (spatial_embedding): Linear(in_features=2, out_features=16, bias=True)
+  )
+  (force_encoder): Encoder(
+    (encoder): LSTM(16, 32)
+    (spatial_embedding): Linear(in_features=2, out_features=16, bias=True)
+  )
+  (intention_decoder): Decoder(
+    (decoder): LSTM(16, 32)
+    (spatial_embedding): Linear(in_features=2, out_features=16, bias=True)
+    (hidden2pos): Linear(in_features=32, out_features=2, bias=True)
+  )
+  (force_decoder): Decoder(
+    (decoder): LSTM(16, 32)
+    (spatial_embedding): Linear(in_features=2, out_features=16, bias=True)
+    (hidden2pos): Linear(in_features=32, out_features=2, bias=True)
+  )
+  (pool_net): SocialPooling(
+    (mlp_pool): Sequential(
+      (0): Linear(in_features=2048, out_features=32, bias=True)
+      (1): ReLU()
+    )
+  )
+  (force_mlp_decoder_context): Sequential(
+    (0): Linear(in_features=64, out_features=64, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=64, out_features=32, bias=True)
+    (3): ReLU()
+  )
+  (intention_mlp_decoder_context): Sequential(
+    (0): Linear(in_features=32, out_features=64, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=64, out_features=30, bias=True)
+    (3): ReLU()
+  )
+  (attention_mlp): Linear(in_features=64, out_features=2, bias=True)
+)
+[INFO: train.py:  207]: Here is the discriminator:
+[INFO: train.py:  208]: TrajectoryDiscriminator(
+  (encoder): Encoder(
+    (encoder): LSTM(16, 64)
+    (spatial_embedding): Linear(in_features=2, out_features=16, bias=True)
+  )
+  (real_classifier): Sequential(
+    (0): Linear(in_features=64, out_features=64, bias=True)
+    (1): ReLU()
+    (2): Linear(in_features=64, out_features=1, bias=True)
+    (3): ReLU()
+  )
+)
+[INFO: train.py:  230]: Restoring from checkpoint ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  279]: Starting epoch 238
+[INFO: train.py:  280]: Epoch resist loss: tensor([ 0.])
+[INFO: train.py:  569]: resist loss: tensor([ 29.9671], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.291207551956177
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.521
+[INFO: train.py:  338]:   [val] ade_l: 1.147
+[INFO: train.py:  338]:   [val] ade_nl: 0.954
+[INFO: train.py:  338]:   [val] d_loss: 1.393
+[INFO: train.py:  338]:   [val] fde: 1.173
+[INFO: train.py:  338]:   [val] fde_l: 2.583
+[INFO: train.py:  338]:   [val] fde_nl: 2.149
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.337
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.337
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.510
+[INFO: train.py:  341]:   [train] ade_l: 1.038
+[INFO: train.py:  341]:   [train] ade_nl: 1.002
+[INFO: train.py:  341]:   [train] d_loss: 1.387
+[INFO: train.py:  341]:   [train] fde: 1.106
+[INFO: train.py:  341]:   [train] fde_l: 2.252
+[INFO: train.py:  341]:   [train] fde_nl: 2.175
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.286
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.286
+[INFO: train.py:  341]:   [train] resist_count: 3030.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.117
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 24.6552], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.706822633743286
+[INFO: train.py:  316]: Interation 10060 took 27.71998929977417
+[INFO: train.py:  569]: resist loss: tensor([ 16.6109], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.131444931030273
+[INFO: train.py:  316]: Interation 10061 took 6.1366448402404785
+[INFO: train.py:  569]: resist loss: tensor([ 31.2136], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.838711261749268
+[INFO: train.py:  316]: Interation 10062 took 6.839010953903198
+[INFO: train.py:  569]: resist loss: tensor([ 23.1966], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.341882705688477
+[INFO: train.py:  316]: Interation 10063 took 6.342218399047852
+[INFO: train.py:  569]: resist loss: tensor([ 39.5938], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.840188503265381
+[INFO: train.py:  316]: Interation 10064 took 7.8461244106292725
+[INFO: train.py:  569]: resist loss: tensor([ 22.0100], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.622803211212158
+[INFO: train.py:  316]: Interation 10065 took 5.628264427185059
+[INFO: train.py:  569]: resist loss: tensor([ 22.2017], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.591548204421997
+[INFO: train.py:  316]: Interation 10066 took 5.5966808795928955
+[INFO: train.py:  569]: resist loss: tensor([ 39.2749], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.358875036239624
+[INFO: train.py:  316]: Interation 10067 took 7.376467704772949
+[INFO: train.py:  569]: resist loss: tensor([ 36.5203], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.187156915664673
+[INFO: train.py:  316]: Interation 10068 took 8.1913743019104
+[INFO: train.py:  569]: resist loss: tensor([ 31.1145], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.909888982772827
+[INFO: train.py:  316]: Interation 10069 took 6.9102091789245605
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.556
+[INFO: train.py:  338]:   [val] ade_l: 1.224
+[INFO: train.py:  338]:   [val] ade_nl: 1.019
+[INFO: train.py:  338]:   [val] d_loss: 1.389
+[INFO: train.py:  338]:   [val] fde: 1.246
+[INFO: train.py:  338]:   [val] fde_l: 2.743
+[INFO: train.py:  338]:   [val] fde_nl: 2.283
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.392
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.392
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.519
+[INFO: train.py:  341]:   [train] ade_l: 1.112
+[INFO: train.py:  341]:   [train] ade_nl: 0.974
+[INFO: train.py:  341]:   [train] d_loss: 1.393
+[INFO: train.py:  341]:   [train] fde: 1.156
+[INFO: train.py:  341]:   [train] fde_l: 2.476
+[INFO: train.py:  341]:   [train] fde_nl: 2.168
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.316
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.316
+[INFO: train.py:  341]:   [train] resist_count: 3810.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.141
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 29.7840], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.852263689041138
+[INFO: train.py:  316]: Interation 10070 took 30.08302593231201
+[INFO: train.py:  569]: resist loss: tensor([ 19.7710], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.084325075149536
+[INFO: train.py:  316]: Interation 10071 took 5.088248014450073
+[INFO: train.py:  569]: resist loss: tensor([ 31.4001], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.782974481582642
+[INFO: train.py:  316]: Interation 10072 took 7.783343553543091
+[INFO: train.py:  569]: resist loss: tensor([ 23.9540], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.45068097114563
+[INFO: train.py:  316]: Interation 10073 took 5.451158046722412
+[INFO: train.py:  569]: resist loss: tensor([ 34.2199], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.08763837814331
+[INFO: train.py:  316]: Interation 10074 took 8.088027477264404
+[INFO: train.py:  569]: resist loss: tensor([ 18.7411], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.081790208816528
+[INFO: train.py:  316]: Interation 10075 took 5.086549758911133
+[INFO: train.py:  569]: resist loss: tensor([ 25.7102], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.496630668640137
+[INFO: train.py:  316]: Interation 10076 took 5.500514507293701
+[INFO: train.py:  569]: resist loss: tensor([ 18.2078], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.198657035827637
+[INFO: train.py:  316]: Interation 10077 took 4.202475547790527
+[INFO: train.py:  569]: resist loss: tensor([ 19.4262], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.318666696548462
+[INFO: train.py:  316]: Interation 10078 took 5.322551012039185
+[INFO: train.py:  569]: resist loss: tensor([ 20.5345], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.221776485443115
+[INFO: train.py:  316]: Interation 10079 took 6.225546598434448
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.460
+[INFO: train.py:  338]:   [val] ade_l: 1.012
+[INFO: train.py:  338]:   [val] ade_nl: 0.842
+[INFO: train.py:  338]:   [val] d_loss: 1.395
+[INFO: train.py:  338]:   [val] fde: 0.987
+[INFO: train.py:  338]:   [val] fde_l: 2.173
+[INFO: train.py:  338]:   [val] fde_nl: 1.808
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.302
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.302
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.439
+[INFO: train.py:  341]:   [train] ade_l: 0.941
+[INFO: train.py:  341]:   [train] ade_nl: 0.822
+[INFO: train.py:  341]:   [train] d_loss: 1.390
+[INFO: train.py:  341]:   [train] fde: 0.944
+[INFO: train.py:  341]:   [train] fde_l: 2.025
+[INFO: train.py:  341]:   [train] fde_nl: 1.768
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.238
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.238
+[INFO: train.py:  341]:   [train] resist_count: 3050.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.124
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 24.5293], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.235910415649414
+[INFO: train.py:  316]: Interation 10080 took 24.754781484603882
+[INFO: train.py:  569]: resist loss: tensor([ 23.0393], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.217252731323242
+[INFO: train.py:  316]: Interation 10081 took 8.221253156661987
+[INFO: train.py:  569]: resist loss: tensor([ 17.0151], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.409076929092407
+[INFO: train.py:  316]: Interation 10082 took 6.413362264633179
+[INFO: train.py:  569]: resist loss: tensor([ 24.0171], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.32200813293457
+[INFO: train.py:  316]: Interation 10083 took 6.326204061508179
+[INFO: train.py:  569]: resist loss: tensor([ 24.6877], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.1556665897369385
+[INFO: train.py:  316]: Interation 10084 took 6.159539461135864
+[INFO: train.py:  569]: resist loss: tensor([ 16.6079], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.120046377182007
+[INFO: train.py:  316]: Interation 10085 took 4.123967885971069
+[INFO: train.py:  569]: resist loss: tensor([ 21.7444], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.099363565444946
+[INFO: train.py:  316]: Interation 10086 took 5.103266000747681
+[INFO: train.py:  569]: resist loss: tensor([ 33.1495], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.542768955230713
+[INFO: train.py:  316]: Interation 10087 took 7.546552896499634
+[INFO: train.py:  569]: resist loss: tensor([ 23.5907], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.5418171882629395
+[INFO: train.py:  316]: Interation 10088 took 5.5460405349731445
+[INFO: train.py:  569]: resist loss: tensor([ 24.2768], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.230035781860352
+[INFO: train.py:  316]: Interation 10089 took 7.2341225147247314
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.471
+[INFO: train.py:  338]:   [val] ade_l: 1.038
+[INFO: train.py:  338]:   [val] ade_nl: 0.863
+[INFO: train.py:  338]:   [val] d_loss: 1.393
+[INFO: train.py:  338]:   [val] fde: 1.012
+[INFO: train.py:  338]:   [val] fde_l: 2.228
+[INFO: train.py:  338]:   [val] fde_nl: 1.854
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.299
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.299
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.424
+[INFO: train.py:  341]:   [train] ade_l: 0.882
+[INFO: train.py:  341]:   [train] ade_nl: 0.817
+[INFO: train.py:  341]:   [train] d_loss: 1.390
+[INFO: train.py:  341]:   [train] fde: 0.902
+[INFO: train.py:  341]:   [train] fde_l: 1.876
+[INFO: train.py:  341]:   [train] fde_nl: 1.738
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.213
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.213
+[INFO: train.py:  341]:   [train] resist_count: 3322.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.125
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 20.9960], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.662101984024048
+[INFO: train.py:  316]: Interation 10090 took 27.533878564834595
+[INFO: train.py:  569]: resist loss: tensor([ 30.1121], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.125521183013916
+[INFO: train.py:  316]: Interation 10091 took 8.129582166671753
+[INFO: train.py:  569]: resist loss: tensor([ 21.2462], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.673723220825195
+[INFO: train.py:  316]: Interation 10092 took 4.677917957305908
+[INFO: train.py:  569]: resist loss: tensor([ 21.0932], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.897274971008301
+[INFO: train.py:  316]: Interation 10093 took 4.901165008544922
+[INFO: train.py:  569]: resist loss: tensor([ 18.8188], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.903095006942749
+[INFO: train.py:  316]: Interation 10094 took 5.9072105884552
+[INFO: train.py:  569]: resist loss: tensor([ 20.4396], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.359481334686279
+[INFO: train.py:  316]: Interation 10095 took 5.363150119781494
+[INFO: train.py:  569]: resist loss: tensor([ 33.6862], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.933069467544556
+[INFO: train.py:  316]: Interation 10096 took 6.937036037445068
+[INFO: train.py:  569]: resist loss: tensor([ 26.6615], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.788935661315918
+[INFO: train.py:  316]: Interation 10097 took 7.792856216430664
+[INFO: train.py:  569]: resist loss: tensor([ 39.7879], device='cuda:0')
+[INFO: train.py:  310]: g step took 10.231222152709961
+[INFO: train.py:  316]: Interation 10098 took 10.235033988952637
+[INFO: train.py:  569]: resist loss: tensor([ 23.4342], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.580955266952515
+[INFO: train.py:  316]: Interation 10099 took 6.584869861602783
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.563
+[INFO: train.py:  338]:   [val] ade_l: 1.239
+[INFO: train.py:  338]:   [val] ade_nl: 1.031
+[INFO: train.py:  338]:   [val] d_loss: 1.394
+[INFO: train.py:  338]:   [val] fde: 1.141
+[INFO: train.py:  338]:   [val] fde_l: 2.512
+[INFO: train.py:  338]:   [val] fde_nl: 2.090
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.361
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.361
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.545
+[INFO: train.py:  341]:   [train] ade_l: 1.140
+[INFO: train.py:  341]:   [train] ade_nl: 1.045
+[INFO: train.py:  341]:   [train] d_loss: 1.394
+[INFO: train.py:  341]:   [train] fde: 1.084
+[INFO: train.py:  341]:   [train] fde_l: 2.266
+[INFO: train.py:  341]:   [train] fde_nl: 2.076
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.301
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.301
+[INFO: train.py:  341]:   [train] resist_count: 3794.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.146
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 22.6386], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.134771347045898
+[INFO: train.py:  316]: Interation 10100 took 28.564998149871826
+[INFO: train.py:  569]: resist loss: tensor([ 0.1501], device='cuda:0')
+[INFO: train.py:  310]: g step took 0.13389992713928223
+[INFO: train.py:  316]: Interation 10101 took 0.13785076141357422
+[INFO: train.py:  279]: Starting epoch 239
+[INFO: train.py:  280]: Epoch resist loss: tensor([ 1069.8292])
+[INFO: train.py:  569]: resist loss: tensor([ 40.1944], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.563854694366455
+[INFO: train.py:  316]: Interation 10102 took 8.926374197006226
+[INFO: train.py:  569]: resist loss: tensor([ 19.5616], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.38857364654541
+[INFO: train.py:  316]: Interation 10103 took 6.400112628936768
+[INFO: train.py:  569]: resist loss: tensor([ 27.0676], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.970839500427246
+[INFO: train.py:  316]: Interation 10104 took 4.971139430999756
+[INFO: train.py:  569]: resist loss: tensor([ 21.2689], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.375133037567139
+[INFO: train.py:  316]: Interation 10105 took 6.375462532043457
+[INFO: train.py:  569]: resist loss: tensor([ 20.9091], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.943534851074219
+[INFO: train.py:  316]: Interation 10106 took 6.943871974945068
+[INFO: train.py:  569]: resist loss: tensor([ 22.1575], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.019292593002319
+[INFO: train.py:  316]: Interation 10107 took 5.023700714111328
+[INFO: train.py:  569]: resist loss: tensor([ 24.8604], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.464320421218872
+[INFO: train.py:  316]: Interation 10108 took 6.464670896530151
+[INFO: train.py:  569]: resist loss: tensor([ 21.4434], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.1547534465789795
+[INFO: train.py:  316]: Interation 10109 took 7.15913724899292
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.452
+[INFO: train.py:  338]:   [val] ade_l: 0.996
+[INFO: train.py:  338]:   [val] ade_nl: 0.829
+[INFO: train.py:  338]:   [val] d_loss: 1.394
+[INFO: train.py:  338]:   [val] fde: 0.965
+[INFO: train.py:  338]:   [val] fde_l: 2.126
+[INFO: train.py:  338]:   [val] fde_nl: 1.769
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.278
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.278
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.420
+[INFO: train.py:  341]:   [train] ade_l: 0.850
+[INFO: train.py:  341]:   [train] ade_nl: 0.831
+[INFO: train.py:  341]:   [train] d_loss: 1.393
+[INFO: train.py:  341]:   [train] fde: 0.886
+[INFO: train.py:  341]:   [train] fde_l: 1.794
+[INFO: train.py:  341]:   [train] fde_nl: 1.753
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.211
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.211
+[INFO: train.py:  341]:   [train] resist_count: 3778.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.153
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 32.3255], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.621820449829102
+[INFO: train.py:  316]: Interation 10110 took 29.44123363494873
+[INFO: train.py:  569]: resist loss: tensor([ 36.7076], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.710627317428589
+[INFO: train.py:  316]: Interation 10111 took 5.7109339237213135
+[INFO: train.py:  569]: resist loss: tensor([ 20.0631], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.073320388793945
+[INFO: train.py:  316]: Interation 10112 took 7.08112907409668
+[INFO: train.py:  569]: resist loss: tensor([ 32.3415], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.593682527542114
+[INFO: train.py:  316]: Interation 10113 took 7.601469278335571
+[INFO: train.py:  569]: resist loss: tensor([ 15.7732], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.882532596588135
+[INFO: train.py:  316]: Interation 10114 took 4.882953882217407
+[INFO: train.py:  569]: resist loss: tensor([ 32.0627], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.832186698913574
+[INFO: train.py:  316]: Interation 10115 took 6.832603216171265
+[INFO: train.py:  569]: resist loss: tensor([ 22.7199], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.40665602684021
+[INFO: train.py:  316]: Interation 10116 took 6.407010793685913
+[INFO: train.py:  569]: resist loss: tensor([ 19.2803], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.651933431625366
+[INFO: train.py:  316]: Interation 10117 took 4.6522743701934814
+[INFO: train.py:  569]: resist loss: tensor([ 23.2906], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.457916498184204
+[INFO: train.py:  316]: Interation 10118 took 6.462330102920532
+[INFO: train.py:  569]: resist loss: tensor([ 27.0062], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.277369260787964
+[INFO: train.py:  316]: Interation 10119 took 7.281491041183472
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.458
+[INFO: train.py:  338]:   [val] ade_l: 1.009
+[INFO: train.py:  338]:   [val] ade_nl: 0.840
+[INFO: train.py:  338]:   [val] d_loss: 1.394
+[INFO: train.py:  338]:   [val] fde: 1.010
+[INFO: train.py:  338]:   [val] fde_l: 2.223
+[INFO: train.py:  338]:   [val] fde_nl: 1.850
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.287
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.287
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.432
+[INFO: train.py:  341]:   [train] ade_l: 0.910
+[INFO: train.py:  341]:   [train] ade_nl: 0.823
+[INFO: train.py:  341]:   [train] d_loss: 1.392
+[INFO: train.py:  341]:   [train] fde: 0.930
+[INFO: train.py:  341]:   [train] fde_l: 1.958
+[INFO: train.py:  341]:   [train] fde_nl: 1.770
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.220
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.220
+[INFO: train.py:  341]:   [train] resist_count: 3876.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.157
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 26.6833], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.469877004623413
+[INFO: train.py:  316]: Interation 10120 took 28.627007246017456
+[INFO: train.py:  569]: resist loss: tensor([ 30.3756], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.267256498336792
+[INFO: train.py:  316]: Interation 10121 took 6.271134853363037
+[INFO: train.py:  569]: resist loss: tensor([ 27.3706], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.733914613723755
+[INFO: train.py:  316]: Interation 10122 took 6.738050699234009
+[INFO: train.py:  569]: resist loss: tensor([ 21.1009], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.543730020523071
+[INFO: train.py:  316]: Interation 10123 took 7.547810077667236
+[INFO: train.py:  569]: resist loss: tensor([ 24.6747], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.53687310218811
+[INFO: train.py:  316]: Interation 10124 took 5.541064023971558
+[INFO: train.py:  569]: resist loss: tensor([ 15.2077], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.0680530071258545
+[INFO: train.py:  316]: Interation 10125 took 4.072195529937744
+[INFO: train.py:  569]: resist loss: tensor([ 37.9988], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.119875907897949
+[INFO: train.py:  316]: Interation 10126 took 7.123627662658691
+[INFO: train.py:  569]: resist loss: tensor([ 40.2301], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.04118537902832
+[INFO: train.py:  316]: Interation 10127 took 8.044955730438232
+[INFO: train.py:  569]: resist loss: tensor([ 24.0319], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.812675714492798
+[INFO: train.py:  316]: Interation 10128 took 6.816568613052368
+[INFO: train.py:  569]: resist loss: tensor([ 23.7742], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.868049621582031
+[INFO: train.py:  316]: Interation 10129 took 5.871874809265137
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.533
+[INFO: train.py:  338]:   [val] ade_l: 1.175
+[INFO: train.py:  338]:   [val] ade_nl: 0.977
+[INFO: train.py:  338]:   [val] d_loss: 1.396
+[INFO: train.py:  338]:   [val] fde: 1.182
+[INFO: train.py:  338]:   [val] fde_l: 2.604
+[INFO: train.py:  338]:   [val] fde_nl: 2.166
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.361
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.361
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.517
+[INFO: train.py:  341]:   [train] ade_l: 1.091
+[INFO: train.py:  341]:   [train] ade_nl: 0.984
+[INFO: train.py:  341]:   [train] d_loss: 1.387
+[INFO: train.py:  341]:   [train] fde: 1.106
+[INFO: train.py:  341]:   [train] fde_l: 2.332
+[INFO: train.py:  341]:   [train] fde_nl: 2.104
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.300
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.300
+[INFO: train.py:  341]:   [train] resist_count: 3442.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.140
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 18.9001], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.3387603759765625
+[INFO: train.py:  316]: Interation 10130 took 27.67713499069214
+[INFO: train.py:  569]: resist loss: tensor([ 18.1198], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.8398542404174805
+[INFO: train.py:  316]: Interation 10131 took 4.8438756465911865
+[INFO: train.py:  569]: resist loss: tensor([ 22.9539], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.321553707122803
+[INFO: train.py:  316]: Interation 10132 took 5.325638771057129
+[INFO: train.py:  569]: resist loss: tensor([ 19.0569], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.962161302566528
+[INFO: train.py:  316]: Interation 10133 took 5.966162919998169
+[INFO: train.py:  569]: resist loss: tensor([ 16.8052], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.919137954711914
+[INFO: train.py:  316]: Interation 10134 took 5.923189163208008
+[INFO: train.py:  569]: resist loss: tensor([ 21.0643], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.079493761062622
+[INFO: train.py:  316]: Interation 10135 took 6.08370041847229
+[INFO: train.py:  569]: resist loss: tensor([ 26.9740], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.987574338912964
+[INFO: train.py:  316]: Interation 10136 took 7.991630554199219
+[INFO: train.py:  569]: resist loss: tensor([ 25.8929], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.8245134353637695
+[INFO: train.py:  316]: Interation 10137 took 5.828674077987671
+[INFO: train.py:  569]: resist loss: tensor([ 19.6319], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.605337858200073
+[INFO: train.py:  316]: Interation 10138 took 5.609255313873291
+[INFO: train.py:  569]: resist loss: tensor([ 30.1967], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.634054660797119
+[INFO: train.py:  316]: Interation 10139 took 7.637830018997192
+[INFO: train.py:  327]: Checking stats on val ...
+Exception ignored in: <bound method _DataLoaderIter.__del__ of <torch.utils.data.dataloader._DataLoaderIter object at 0x7f486e1310b8>>
+Traceback (most recent call last):
+  File "/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/torch/utils/data/dataloader.py", line 349, in __del__
+    self._shutdown_workers()
+  File "/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/torch/utils/data/dataloader.py", line 328, in _shutdown_workers
+    self.worker_result_queue.get()
+  File "/usr/lib/python3.5/multiprocessing/queues.py", line 345, in get
+    return ForkingPickler.loads(res)
+  File "/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/torch/multiprocessing/reductions.py", line 70, in rebuild_storage_fd
+    fd = df.detach()
+  File "/usr/lib/python3.5/multiprocessing/resource_sharer.py", line 57, in detach
+    with _resource_sharer.get_connection(self._id) as conn:
+  File "/usr/lib/python3.5/multiprocessing/resource_sharer.py", line 87, in get_connection
+    c = Client(address, authkey=process.current_process().authkey)
+  File "/usr/lib/python3.5/multiprocessing/connection.py", line 493, in Client
+    answer_challenge(c, authkey)
+  File "/usr/lib/python3.5/multiprocessing/connection.py", line 737, in answer_challenge
+    response = connection.recv_bytes(256)        # reject large message
+  File "/usr/lib/python3.5/multiprocessing/connection.py", line 216, in recv_bytes
+    buf = self._recv_bytes(maxlength)
+  File "/usr/lib/python3.5/multiprocessing/connection.py", line 407, in _recv_bytes
+    buf = self._recv(4)
+  File "/usr/lib/python3.5/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+ConnectionResetError: [Errno 104] Connection reset by peer
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.521
+[INFO: train.py:  338]:   [val] ade_l: 1.148
+[INFO: train.py:  338]:   [val] ade_nl: 0.955
+[INFO: train.py:  338]:   [val] d_loss: 1.393
+[INFO: train.py:  338]:   [val] fde: 1.110
+[INFO: train.py:  338]:   [val] fde_l: 2.443
+[INFO: train.py:  338]:   [val] fde_nl: 2.033
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.334
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.334
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.500
+[INFO: train.py:  341]:   [train] ade_l: 1.017
+[INFO: train.py:  341]:   [train] ade_nl: 0.986
+[INFO: train.py:  341]:   [train] d_loss: 1.393
+[INFO: train.py:  341]:   [train] fde: 1.039
+[INFO: train.py:  341]:   [train] fde_l: 2.111
+[INFO: train.py:  341]:   [train] fde_nl: 2.047
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.274
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.274
+[INFO: train.py:  341]:   [train] resist_count: 3514.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.146
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 24.4249], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.940244436264038
+[INFO: train.py:  316]: Interation 10140 took 28.9043071269989
+[INFO: train.py:  569]: resist loss: tensor([ 21.2936], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.308609485626221
+[INFO: train.py:  316]: Interation 10141 took 6.312448024749756
+[INFO: train.py:  569]: resist loss: tensor([ 35.7708], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.754462242126465
+[INFO: train.py:  316]: Interation 10142 took 6.75818657875061
+[INFO: train.py:  569]: resist loss: tensor([ 18.1356], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.585768461227417
+[INFO: train.py:  316]: Interation 10143 took 5.5896971225738525
+[INFO: train.py:  569]: resist loss: tensor([ 0.5228], device='cuda:0')
+[INFO: train.py:  310]: g step took 0.27717089653015137
+[INFO: train.py:  316]: Interation 10144 took 0.2809574604034424
+[INFO: train.py:  279]: Starting epoch 240
+[INFO: train.py:  280]: Epoch resist loss: tensor([ 1050.2250])
+[INFO: train.py:  569]: resist loss: tensor([ 14.1411], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.519721508026123
+[INFO: train.py:  316]: Interation 10145 took 4.90690016746521
+[INFO: train.py:  569]: resist loss: tensor([ 29.3185], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.585465908050537
+[INFO: train.py:  316]: Interation 10146 took 7.597438335418701
+[INFO: train.py:  569]: resist loss: tensor([ 25.3118], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.473084449768066
+[INFO: train.py:  316]: Interation 10147 took 4.493306398391724
+[INFO: train.py:  569]: resist loss: tensor([ 34.6740], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.305870056152344
+[INFO: train.py:  316]: Interation 10148 took 7.306189060211182
+[INFO: train.py:  569]: resist loss: tensor([ 32.5109], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.226283311843872
+[INFO: train.py:  316]: Interation 10149 took 7.226627588272095
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.513
+[INFO: train.py:  338]:   [val] ade_l: 1.130
+[INFO: train.py:  338]:   [val] ade_nl: 0.940
+[INFO: train.py:  338]:   [val] d_loss: 1.392
+[INFO: train.py:  338]:   [val] fde: 1.117
+[INFO: train.py:  338]:   [val] fde_l: 2.459
+[INFO: train.py:  338]:   [val] fde_nl: 2.046
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.350
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.350
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.485
+[INFO: train.py:  341]:   [train] ade_l: 1.000
+[INFO: train.py:  341]:   [train] ade_nl: 0.943
+[INFO: train.py:  341]:   [train] d_loss: 1.394
+[INFO: train.py:  341]:   [train] fde: 1.047
+[INFO: train.py:  341]:   [train] fde_l: 2.158
+[INFO: train.py:  341]:   [train] fde_nl: 2.035
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.287
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.287
+[INFO: train.py:  341]:   [train] resist_count: 3476.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.140
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 18.6605], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.058209657669067
+[INFO: train.py:  316]: Interation 10150 took 27.614019632339478
+[INFO: train.py:  569]: resist loss: tensor([ 31.2783], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.496932983398438
+[INFO: train.py:  316]: Interation 10151 took 8.517616510391235
+[INFO: train.py:  569]: resist loss: tensor([ 20.6020], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.479767322540283
+[INFO: train.py:  316]: Interation 10152 took 5.480101823806763
+[INFO: train.py:  569]: resist loss: tensor([ 16.6631], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.910737037658691
+[INFO: train.py:  316]: Interation 10153 took 5.9110729694366455
+[INFO: train.py:  569]: resist loss: tensor([ 18.6822], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.229546546936035
+[INFO: train.py:  316]: Interation 10154 took 6.229909420013428
+[INFO: train.py:  569]: resist loss: tensor([ 11.8535], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.096267938613892
+[INFO: train.py:  316]: Interation 10155 took 5.1004798412323
+[INFO: train.py:  569]: resist loss: tensor([ 25.0531], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.772841215133667
+[INFO: train.py:  316]: Interation 10156 took 6.773184537887573
+[INFO: train.py:  569]: resist loss: tensor([ 21.5467], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.073544979095459
+[INFO: train.py:  316]: Interation 10157 took 5.073917388916016
+[INFO: train.py:  569]: resist loss: tensor([ 20.6051], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.883394241333008
+[INFO: train.py:  316]: Interation 10158 took 7.883726596832275
+[INFO: train.py:  569]: resist loss: tensor([ 19.6798], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.045911550521851
+[INFO: train.py:  316]: Interation 10159 took 5.050205945968628
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.603
+[INFO: train.py:  338]:   [val] ade_l: 1.327
+[INFO: train.py:  338]:   [val] ade_nl: 1.104
+[INFO: train.py:  338]:   [val] d_loss: 1.394
+[INFO: train.py:  338]:   [val] fde: 1.218
+[INFO: train.py:  338]:   [val] fde_l: 2.682
+[INFO: train.py:  338]:   [val] fde_nl: 2.232
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.423
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.423
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.586
+[INFO: train.py:  341]:   [train] ade_l: 1.230
+[INFO: train.py:  341]:   [train] ade_nl: 1.120
+[INFO: train.py:  341]:   [train] d_loss: 1.398
+[INFO: train.py:  341]:   [train] fde: 1.163
+[INFO: train.py:  341]:   [train] fde_l: 2.441
+[INFO: train.py:  341]:   [train] fde_nl: 2.223
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.364
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.364
+[INFO: train.py:  341]:   [train] resist_count: 3608.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.146
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 32.2126], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.058868169784546
+[INFO: train.py:  316]: Interation 10160 took 30.164132356643677
+[INFO: train.py:  569]: resist loss: tensor([ 26.2484], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.5328662395477295
+[INFO: train.py:  316]: Interation 10161 took 6.533169984817505
+[INFO: train.py:  569]: resist loss: tensor([ 17.0411], device='cuda:0')
+[INFO: train.py:  310]: g step took 4.980207443237305
+[INFO: train.py:  316]: Interation 10162 took 4.98406982421875
+[INFO: train.py:  569]: resist loss: tensor([ 22.0400], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.538830280303955
+[INFO: train.py:  316]: Interation 10163 took 6.542582988739014
+[INFO: train.py:  569]: resist loss: tensor([ 21.4485], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.360891103744507
+[INFO: train.py:  316]: Interation 10164 took 6.364653587341309
+[INFO: train.py:  569]: resist loss: tensor([ 20.9940], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.247971773147583
+[INFO: train.py:  316]: Interation 10165 took 6.251797199249268
+[INFO: train.py:  569]: resist loss: tensor([ 29.1958], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.895863056182861
+[INFO: train.py:  316]: Interation 10166 took 6.899710655212402
+[INFO: train.py:  569]: resist loss: tensor([ 37.7215], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.615630149841309
+[INFO: train.py:  316]: Interation 10167 took 6.619473695755005
+[INFO: train.py:  569]: resist loss: tensor([ 19.2639], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.638863801956177
+[INFO: train.py:  316]: Interation 10168 took 5.642643928527832
+[INFO: train.py:  569]: resist loss: tensor([ 15.1989], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.817895412445068
+[INFO: train.py:  316]: Interation 10169 took 5.822150707244873
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.598
+[INFO: train.py:  338]:   [val] ade_l: 1.317
+[INFO: train.py:  338]:   [val] ade_nl: 1.096
+[INFO: train.py:  338]:   [val] d_loss: 1.392
+[INFO: train.py:  338]:   [val] fde: 1.232
+[INFO: train.py:  338]:   [val] fde_l: 2.713
+[INFO: train.py:  338]:   [val] fde_nl: 2.257
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.419
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.419
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.564
+[INFO: train.py:  341]:   [train] ade_l: 1.171
+[INFO: train.py:  341]:   [train] ade_nl: 1.087
+[INFO: train.py:  341]:   [train] d_loss: 1.398
+[INFO: train.py:  341]:   [train] fde: 1.148
+[INFO: train.py:  341]:   [train] fde_l: 2.385
+[INFO: train.py:  341]:   [train] fde_nl: 2.214
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.346
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.346
+[INFO: train.py:  341]:   [train] resist_count: 3568.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.149
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 41.5023], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.241280317306519
+[INFO: train.py:  316]: Interation 10170 took 31.240355253219604
+[INFO: train.py:  569]: resist loss: tensor([ 24.3191], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.567007064819336
+[INFO: train.py:  316]: Interation 10171 took 6.5712831020355225
+[INFO: train.py:  569]: resist loss: tensor([ 32.0189], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.971974611282349
+[INFO: train.py:  316]: Interation 10172 took 6.975993394851685
+[INFO: train.py:  569]: resist loss: tensor([ 33.7697], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.014352083206177
+[INFO: train.py:  316]: Interation 10173 took 8.018438816070557
+[INFO: train.py:  569]: resist loss: tensor([ 15.7115], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.150169134140015
+[INFO: train.py:  316]: Interation 10174 took 5.154773712158203
+[INFO: train.py:  569]: resist loss: tensor([ 21.8339], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.3877952098846436
+[INFO: train.py:  316]: Interation 10175 took 5.391766309738159
+[INFO: train.py:  569]: resist loss: tensor([ 28.1724], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.924040794372559
+[INFO: train.py:  316]: Interation 10176 took 6.928081750869751
+[INFO: train.py:  569]: resist loss: tensor([ 38.5191], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.138038396835327
+[INFO: train.py:  316]: Interation 10177 took 8.142214059829712
+[INFO: train.py:  569]: resist loss: tensor([ 18.9082], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.100121974945068
+[INFO: train.py:  316]: Interation 10178 took 6.103889226913452
+[INFO: train.py:  569]: resist loss: tensor([ 30.1088], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.1327855587005615
+[INFO: train.py:  316]: Interation 10179 took 7.136481046676636
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.568
+[INFO: train.py:  338]:   [val] ade_l: 1.251
+[INFO: train.py:  338]:   [val] ade_nl: 1.041
+[INFO: train.py:  338]:   [val] d_loss: 1.395
+[INFO: train.py:  338]:   [val] fde: 1.153
+[INFO: train.py:  338]:   [val] fde_l: 2.538
+[INFO: train.py:  338]:   [val] fde_nl: 2.112
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.374
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.374
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.566
+[INFO: train.py:  341]:   [train] ade_l: 1.224
+[INFO: train.py:  341]:   [train] ade_nl: 1.052
+[INFO: train.py:  341]:   [train] d_loss: 1.393
+[INFO: train.py:  341]:   [train] fde: 1.117
+[INFO: train.py:  341]:   [train] fde_l: 2.416
+[INFO: train.py:  341]:   [train] fde_nl: 2.077
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.329
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.329
+[INFO: train.py:  341]:   [train] resist_count: 3258.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.135
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 24.7084], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.26259994506836
+[INFO: train.py:  316]: Interation 10180 took 33.70910096168518
+[INFO: train.py:  569]: resist loss: tensor([ 17.1674], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.492859125137329
+[INFO: train.py:  316]: Interation 10181 took 6.496592283248901
+[INFO: train.py:  569]: resist loss: tensor([ 27.0045], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.02762770652771
+[INFO: train.py:  316]: Interation 10182 took 8.031391143798828
+[INFO: train.py:  569]: resist loss: tensor([ 19.7253], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.481992483139038
+[INFO: train.py:  316]: Interation 10183 took 7.486131429672241
+[INFO: train.py:  569]: resist loss: tensor([ 17.4756], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.71543574333191
+[INFO: train.py:  316]: Interation 10184 took 8.719600677490234
+[INFO: train.py:  569]: resist loss: tensor([ 16.6396], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.8369574546813965
+[INFO: train.py:  316]: Interation 10185 took 7.840999126434326
+[INFO: train.py:  569]: resist loss: tensor([ 29.7688], device='cuda:0')
+[INFO: train.py:  310]: g step took 9.947017669677734
+[INFO: train.py:  316]: Interation 10186 took 9.951166868209839
+[INFO: train.py:  569]: resist loss: tensor([ 4.6071], device='cuda:0')
+[INFO: train.py:  310]: g step took 1.156914472579956
+[INFO: train.py:  316]: Interation 10187 took 1.1610145568847656
+[INFO: train.py:  279]: Starting epoch 241
+[INFO: train.py:  280]: Epoch resist loss: tensor([ 1023.9059])
+[INFO: train.py:  569]: resist loss: tensor([ 39.2377], device='cuda:0')
+[INFO: train.py:  310]: g step took 10.045414447784424
+[INFO: train.py:  316]: Interation 10188 took 10.394360542297363
+[INFO: train.py:  569]: resist loss: tensor([ 19.9318], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.86547327041626
+[INFO: train.py:  316]: Interation 10189 took 7.873128890991211
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.505
+[INFO: train.py:  338]:   [val] ade_l: 1.111
+[INFO: train.py:  338]:   [val] ade_nl: 0.925
+[INFO: train.py:  338]:   [val] d_loss: 1.391
+[INFO: train.py:  338]:   [val] fde: 1.138
+[INFO: train.py:  338]:   [val] fde_l: 2.506
+[INFO: train.py:  338]:   [val] fde_nl: 2.085
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.342
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.342
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.464
+[INFO: train.py:  341]:   [train] ade_l: 0.951
+[INFO: train.py:  341]:   [train] ade_nl: 0.905
+[INFO: train.py:  341]:   [train] d_loss: 1.388
+[INFO: train.py:  341]:   [train] fde: 1.030
+[INFO: train.py:  341]:   [train] fde_l: 2.112
+[INFO: train.py:  341]:   [train] fde_nl: 2.010
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.258
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.258
+[INFO: train.py:  341]:   [train] resist_count: 3514.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.135
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 52.9303], device='cuda:0')
+[INFO: train.py:  310]: g step took 10.642605781555176
+[INFO: train.py:  316]: Interation 10190 took 39.82854890823364
+[INFO: train.py:  569]: resist loss: tensor([ 31.6097], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.014278888702393
+[INFO: train.py:  316]: Interation 10191 took 8.014618873596191
+[INFO: train.py:  569]: resist loss: tensor([ 21.0748], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.106585502624512
+[INFO: train.py:  316]: Interation 10192 took 7.106897592544556
+[INFO: train.py:  569]: resist loss: tensor([ 21.2210], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.368374347686768
+[INFO: train.py:  316]: Interation 10193 took 7.368875980377197
+[INFO: train.py:  569]: resist loss: tensor([ 23.1676], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.427805185317993
+[INFO: train.py:  316]: Interation 10194 took 8.428185939788818
+[INFO: train.py:  569]: resist loss: tensor([ 28.1826], device='cuda:0')
+[INFO: train.py:  310]: g step took 10.059366464614868
+[INFO: train.py:  316]: Interation 10195 took 10.059741258621216
+[INFO: train.py:  569]: resist loss: tensor([ 12.8831], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.8117194175720215
+[INFO: train.py:  316]: Interation 10196 took 6.816258192062378
+[INFO: train.py:  569]: resist loss: tensor([ 26.7785], device='cuda:0')
+[INFO: train.py:  310]: g step took 6.228747129440308
+[INFO: train.py:  316]: Interation 10197 took 6.243775129318237
+[INFO: train.py:  569]: resist loss: tensor([ 25.8991], device='cuda:0')
+[INFO: train.py:  310]: g step took 9.415786266326904
+[INFO: train.py:  316]: Interation 10198 took 9.427542209625244
+[INFO: train.py:  569]: resist loss: tensor([ 31.6322], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.281805992126465
+[INFO: train.py:  316]: Interation 10199 took 8.282211780548096
+[INFO: train.py:  327]: Checking stats on val ...
+[INFO: train.py:  331]: Checking stats on train ...
+[INFO: train.py:  338]:   [val] ade: 0.472
+[INFO: train.py:  338]:   [val] ade_l: 1.040
+[INFO: train.py:  338]:   [val] ade_nl: 0.866
+[INFO: train.py:  338]:   [val] d_loss: 1.390
+[INFO: train.py:  338]:   [val] fde: 1.036
+[INFO: train.py:  338]:   [val] fde_l: 2.282
+[INFO: train.py:  338]:   [val] fde_nl: 1.898
+[INFO: train.py:  338]:   [val] g_l2_loss_abs: 0.307
+[INFO: train.py:  338]:   [val] g_l2_loss_rel: 0.307
+[INFO: train.py:  338]:   [val] resist_count: 2772.000
+[INFO: train.py:  338]:   [val] resist_loss: 0.181
+[INFO: train.py:  341]:   [train] ade: 0.427
+[INFO: train.py:  341]:   [train] ade_l: 0.890
+[INFO: train.py:  341]:   [train] ade_nl: 0.822
+[INFO: train.py:  341]:   [train] d_loss: 1.389
+[INFO: train.py:  341]:   [train] fde: 0.916
+[INFO: train.py:  341]:   [train] fde_l: 1.909
+[INFO: train.py:  341]:   [train] fde_nl: 1.762
+[INFO: train.py:  341]:   [train] g_l2_loss_abs: 0.223
+[INFO: train.py:  341]:   [train] g_l2_loss_rel: 0.223
+[INFO: train.py:  341]:   [train] resist_count: 3104.000
+[INFO: train.py:  341]:   [train] resist_loss: 0.141
+[INFO: train.py:  368]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_with_model.pt
+[INFO: train.py:  370]: Done.
+[INFO: train.py:  376]: Saving checkpoint to ./models/headingloss_zara1_batch32_epoch500_spool_no_model.pt
+[INFO: train.py:  387]: Done.
+[INFO: train.py:  569]: resist loss: tensor([ 24.2237], device='cuda:0')
+[INFO: train.py:  310]: g step took 9.31783676147461
+[INFO: train.py:  316]: Interation 10200 took 37.14121127128601
+[INFO: train.py:  569]: resist loss: tensor([ 33.8175], device='cuda:0')
+[INFO: train.py:  310]: g step took 9.387682676315308
+[INFO: train.py:  316]: Interation 10201 took 9.38804030418396
+[INFO: train.py:  569]: resist loss: tensor([ 13.6034], device='cuda:0')
+[INFO: train.py:  310]: g step took 5.001925945281982
+[INFO: train.py:  316]: Interation 10202 took 5.002434015274048
+[INFO: train.py:  569]: resist loss: tensor([ 21.4556], device='cuda:0')
+[INFO: train.py:  310]: g step took 9.315146923065186
+[INFO: train.py:  316]: Interation 10203 took 9.315609216690063
+[INFO: train.py:  569]: resist loss: tensor([ 29.9566], device='cuda:0')
+[INFO: train.py:  310]: g step took 11.38541316986084
+[INFO: train.py:  316]: Interation 10204 took 11.389986276626587
+[INFO: train.py:  569]: resist loss: tensor([ 21.7076], device='cuda:0')
+[INFO: train.py:  310]: g step took 7.4416515827178955
+[INFO: train.py:  316]: Interation 10205 took 7.44585919380188
+[INFO: train.py:  569]: resist loss: tensor([ 21.9033], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.069655179977417
+[INFO: train.py:  316]: Interation 10206 took 8.073872566223145
+[INFO: train.py:  569]: resist loss: tensor([ 24.7962], device='cuda:0')
+[INFO: train.py:  310]: g step took 8.561336278915405
+[INFO: train.py:  316]: Interation 10207 took 8.565783500671387

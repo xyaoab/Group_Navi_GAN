@@ -103,7 +103,6 @@ parser.add_argument('--benchmark', default=False, type=bool)
 parser.add_argument('--spatial_dim', default=True, type=bool)
 parser.add_argument('--pruning', default=False, type=bool)
 
-from evaluate_model import evaluate
 
 safe_dist = 0.45
 
@@ -456,11 +455,11 @@ def generator_step(
 
     obs_len = np.random.randint(4)+4
     obs_len = old_obs_len
-    pred_len = np.random.randint(old_pred_len - 6, old_pred_len)+1
+    pred_len = np.random.randint(old_pred_len - 6, old_pred_len) +1
 
     # Preserve original goal
     goals = pred_traj_gt[pred_len-1,:,:]
-    pred_len = np.random.randint(1, 5)
+    pred_len = np.random.randint(2, 5)
 
     obs_traj = obs_traj[-obs_len:, :, :]
     pred_traj_gt = pred_traj_gt[:pred_len, :, :]
@@ -468,7 +467,8 @@ def generator_step(
     pred_traj_gt_rel = pred_traj_gt - obs_traj[0,:,:]
 
     goals_rel = goals - obs_traj[0,:,:]
-
+    #logger.info('[ Re-sample random length] obs_traj: {};  pred_traj_gt: {}'.format(obs_traj.size(0),  pred_traj_gt.size(0)))
+            
     """
     Generator step
     """
@@ -481,7 +481,7 @@ def generator_step(
     loss_mask = loss_mask[:, args.obs_len:]
 
     for augment in range(4):
-        #augment = np.random.randint(4)
+    
         g_l2_loss_rel = []
         # cannot make the change in-place
         obs_traj = obs_traj.clone()
@@ -511,7 +511,9 @@ def generator_step(
 
         for _ in range(args.best_k):
             gt_rel = None
+            
             pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, seq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
+            #logger.info('[after flipping] obs_traj: {}; pred_traj_fake_rel: {}'.format(obs_traj.size(0), pred_traj_fake_rel.size(0)))
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
             # Optimize delta position instead of whole trajectory
@@ -737,10 +739,10 @@ def cal_fde(
     return fde, fde_l, fde_nl
 # get ped obs heading angle difference in cos 
 def get_heading_difference(obs_traj_rel, _count, _start, _end):
-    obs_length = _count.item()
+    obs_length = _count
     start = _start.item()
     end = _end.item()
-    logger.info('[get_heading_difference]: obs_length is {}, count is {}'.format{obs_traj_rel.size(0).item(), obs_length})
+    #logger.info('[get_heading_difference]: obs_length is {}, count is {}'.format(obs_traj_rel.size(0), obs_length))
     heading_mask = nn.init.eye_(torch.empty(end-start, end-start))
     delta_x = obs_traj_rel[0,start:end, 0]  - obs_traj_rel[-1,start:end, 0] 
     delta_y = obs_traj_rel[0,start:end, 1]  - obs_traj_rel[-1,start:end, 1] 
@@ -755,5 +757,5 @@ def get_heading_difference(obs_traj_rel, _count, _start, _end):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    print("cude available " + str(torch.cuda.is_available()))
+    #print("cuda available " + str(torch.cuda.is_available()))
     main(args)

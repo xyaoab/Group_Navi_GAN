@@ -36,9 +36,10 @@ python3 scripts/train.py \
   --best_k 1 \
   --gpu_num 0 \
   --checkpoint_name headingloss_zara1_batch32_epoch500_spool \
-  --restore_from_checkpoint 0 \
-  --output_dir './models'\
-  --benchmark True\
-  --spatial_dim True\
-  --resist_loss_weight 1\
+  --restore_from_checkpoint 1 \
+  --output_dir './models' \
+  --benchmark True \
+  --spatial_dim True \
+  --resist_loss_weight 1 \
+  --resist_loss_heading 1 \
   2>&1 | tee training_headingloss_batch32_epoch500_spool.log

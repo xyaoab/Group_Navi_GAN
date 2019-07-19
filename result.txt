@@ -1,0 +1,29 @@
+###############
+20 samples 
+/benchmark_zara1_batch32_epoch500_poolnet_with_model.pt
+Dataset: zara1, Pred Len: 8, ADE: 0.30, FDE: 0.67
+Dataset: zara1, Pred Len: 8, D_real: 0.04/0.08, D_fake: 0.03/0.07
+1 sample 
+Dataset: zara1, Pred Len: 8, ADE: 0.59, FDE: 0.67
+Dataset: zara1, Pred Len: 8, D_real: 0.04/0.08, D_fake: 0.03/0.07
+###############
+
+
+###############
+/benchmark_zara1_batch32_epoch500_spool_with_model.pt
+20 samples 
+Dataset: zara1, Pred Len: 8, ADE: 0.34, FDE: 0.82
+Dataset: zara1, Pred Len: 8, D_real: 0.25/0.32, D_fake: 0.24/0.32
+###############
+
+###############
+/headingloss_zara1_batch32_epoch500_poolnet_with_model.pt
+20 samples
+Dataset: zara1, Pred Len: 8, ADE: 0.29, FDE: 0.69
+Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.32/0.31
+Dataset: zara1, Pred Len: 8, ADE: 0.33, FDE: 0.68
+Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.34/0.30
+
+1 sample
+taset: zara1, Pred Len: 8, ADE: 0.23, FDE: 0.50
+Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.33/0.32

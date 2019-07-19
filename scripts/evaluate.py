@@ -1,8 +1,10 @@
 import argparse
 import os
+import sys
 import torch
 import imageio
 import numpy as np
+import logging
 
 import matplotlib
 matplotlib.use('Agg')
@@ -12,68 +14,24 @@ from attrdict import AttrDict
 torch.backends.cudnn.benchmark = True
 
 from sgan.data.loader import data_loader
-from sgan.models import TrajectoryGenerator, TrajectoryDiscriminator, TrajectoryIntention
+
+
+from sgan.various_length_models import TrajectoryDiscriminator,LateAttentionFullGenerator
+
 from sgan.losses import displacement_error, final_displacement_error
 from sgan.utils import relative_to_abs, get_dset_path
 
 parser = argparse.ArgumentParser()
+FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)
+logger = logging.getLogger(__name__)
+
 parser.add_argument('--model_path', type=str)
 parser.add_argument('--num_samples', default=20, type=int)
 parser.add_argument('--dset_type', default='test', type=str)
 parser.add_argument('--best', default=False, type=bool)
-parser.add_argument('--plot', default=True, type=bool)
+parser.add_argument('--plot', default=False, type=bool)
 parser.add_argument('--plot_dir', default='./plots/trajs/')
-
-
-def get_intention_generator(checkpoint, best=False):
-    args = AttrDict(checkpoint['args'])
-    generator = TrajectoryIntention(
-        obs_len=args.obs_len,
-        pred_len=args.pred_len,
-        embedding_dim=args.embedding_dim,
-        encoder_h_dim=args.encoder_h_dim_g,
-        decoder_h_dim=args.decoder_h_dim_g,
-        mlp_dim=args.mlp_dim,
-        num_layers=args.num_layers,
-        goal_dim=(2,),
-        dropout=args.dropout,
-        bottleneck_dim=args.bottleneck_dim,
-        batch_norm=args.batch_norm)
-    if best:
-        generator.load_state_dict(checkpoint['i_best_state'])
-    else:
-        generator.load_state_dict(checkpoint['i_state'])
-    generator.cuda()
-    generator.train()
-    return generator
-
-def get_force_generator(checkpoint, best=False):
-    args = AttrDict(checkpoint['args'])
-    generator = TrajectoryGenerator(
-        obs_len=args.obs_len,
-        pred_len=args.pred_len,
-        embedding_dim=args.embedding_dim,
-        encoder_h_dim=args.encoder_h_dim_g,
-        decoder_h_dim=args.decoder_h_dim_g,
-        mlp_dim=args.mlp_dim,
-        num_layers=args.num_layers,
-        noise_dim=args.noise_dim,
-        noise_type=args.noise_type,
-        noise_mix_type=args.noise_mix_type,
-        pooling_type=args.pooling_type,
-        pool_every_timestep=args.pool_every_timestep,
-        dropout=args.dropout,
-        bottleneck_dim=args.bottleneck_dim,
-        neighborhood_size=args.neighborhood_size,
-        grid_size=args.grid_size,
-        batch_norm=args.batch_norm)
-    if best:
-        generator.load_state_dict(checkpoint['g_best_state'])
-    else:
-        generator.load_state_dict(checkpoint['g_state'])
-    generator.cuda()
-    generator.train()
-    return generator
 
 def get_discriminator(checkpoint, best=False):
     args = AttrDict(checkpoint['args'])
@@ -95,6 +53,37 @@ def get_discriminator(checkpoint, best=False):
     discriminator.train()
     return discriminator
 
+# For late attent model by full state
+def get_attention_generator(checkpoint, best=False):
+    args = AttrDict(checkpoint['args'])
+    generator = LateAttentionFullGenerator(
+        goal_dim=(2,),
+        obs_len=args.obs_len,
+        pred_len=args.pred_len,
+        embedding_dim=args.embedding_dim,
+        encoder_h_dim=args.encoder_h_dim_g,
+        decoder_h_dim=args.decoder_h_dim_g,
+        mlp_dim=args.mlp_dim,
+        num_layers=args.num_layers,
+        noise_dim=args.noise_dim,
+        noise_type=args.noise_type,
+        noise_mix_type=args.noise_mix_type,
+        pooling_type=args.pooling_type,
+        pool_every_timestep=args.pool_every_timestep,
+        dropout=args.dropout,
+        bottleneck_dim=args.bottleneck_dim,
+        neighborhood_size=args.neighborhood_size,
+        grid_size=args.grid_size,
+        batch_norm=args.batch_norm,
+        spatial_dim=2)
+    if best:
+        generator.load_state_dict(checkpoint['g_best_state'])
+    else:
+        generator.load_state_dict(checkpoint['g_state'])
+    generator.cuda()
+    generator.train()
+    return generator
+
 
 def evaluate_helper(error, seq_start_end):
     sum_ = 0
@@ -111,13 +100,13 @@ def evaluate_helper(error, seq_start_end):
 
 
 def evaluate(
-        args, loader, force_generator, intention_generator, discriminator, 
-        num_samples, plot=False, plot_dir=None, dset_type='val'
+        args, loader, attention_generator, discriminator, num_samples, plot=False, plot_dir=None, dset_type='test'
     ):
     ade_outer, fde_outer = [], []
     total_traj = 0
     count = 1
     guid = 0
+    attention_generator.eval()
     with torch.no_grad():
         D_real, D_fake = [], []
         for batch in loader:
@@ -126,22 +115,22 @@ def evaluate(
             batch = [tensor.cuda() for tensor in batch]
             (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel,
              non_linear_ped, loss_mask, seq_start_end, goals, goals_rel) = batch
-
+            goals = pred_traj_gt[-1,:,:]
+            goals_rel = goals - obs_traj[0,:,:]
+            
 #            import pdb; pdb.set_trace()
 
             ade, fde = [], []
             total_traj += pred_traj_gt.size(1)
 
             for _ in range(num_samples):
-                pred_traj_fake_rel = intention_generator(
-                    obs_traj, obs_traj_rel, seq_start_end, goal_input=goals_rel
-                )
-                pred_traj_fake_rel += force_generator(
-                    obs_traj, obs_traj_rel, seq_start_end
-                )
-                pred_traj_fake = relative_to_abs(
-                    pred_traj_fake_rel, obs_traj[0]
-                )
+                logger.info(num_samples)
+                pred_traj_fake_rel, _ = attention_generator(
+                obs_traj, obs_traj_rel, seq_start_end, seq_len=attention_generator.pred_len, goal_input=goals_rel)
+        
+            
+                pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
+
                 ade.append(displacement_error(
                     pred_traj_fake, pred_traj_gt, mode='raw'
                 ))
@@ -149,15 +138,16 @@ def evaluate(
                     pred_traj_fake[-1], pred_traj_gt[-1], mode='raw'
                 ))
                 scores_real = discriminator(
-                    torch.cat([obs_traj, pred_traj_gt], dim=0),
-                    torch.cat([obs_traj_rel, pred_traj_gt_rel], dim=0),
-                    seq_start_end
+                   torch.cat([obs_traj, pred_traj_gt], dim=0),
+                   torch.cat([obs_traj_rel, pred_traj_gt_rel], dim=0),
+                   seq_start_end
                 )
                 scores_fake = discriminator(
-                    torch.cat([obs_traj, pred_traj_fake], dim=0),
-                    torch.cat([obs_traj_rel, pred_traj_fake_rel], dim=0),
-                    seq_start_end
+                   torch.cat([obs_traj, pred_traj_fake], dim=0),
+                   torch.cat([obs_traj_rel, pred_traj_fake_rel], dim=0),
+                   seq_start_end
                 )
+          
                 D_real.append(scores_real)
                 D_fake.append(scores_fake)
                 
@@ -168,7 +158,8 @@ def evaluate(
                     if not os.path.exists(_plot_dir):
                         os.makedirs(_plot_dir)
                     fig = plt.figure()
-                    goal_point = goals[0, 0, :]
+                    goal_point = goals[0, :]
+                    
                     whole_traj_fake = torch.cat([obs_traj, pred_traj_fake], dim=0)
                     whole_traj_fake = whole_traj_fake[:, 0, :]
                     whole_traj_gt = torch.cat([obs_traj, pred_traj_gt], dim=0)
@@ -217,11 +208,16 @@ def evaluate(
                                     [plot_time_step(i) for i in range(args.obs_len+args.pred_len)],
                                     fps=2)
 
+            
             ade_sum = evaluate_helper(ade, seq_start_end)
             fde_sum = evaluate_helper(fde, seq_start_end)
-
+           
             ade_outer.append(ade_sum)
             fde_outer.append(fde_sum)
+                
+            logger.info('ade is {:.2f}'.format(len(ade_outer)))
+            logger.info('fde is {:.2f}'.format(len(fde_outer)))
+            
         ade = sum(ade_outer) / (total_traj * args.pred_len)
         fde = sum(fde_outer) / (total_traj)
         D_real = torch.squeeze(torch.cat(D_real, dim=0))
@@ -246,14 +242,13 @@ def main(args):
     for path in paths:
 
         checkpoint = torch.load(path, map_location='cuda:0')
-        force_generator = get_force_generator(checkpoint, best=args.best)
-        intention_generator = get_intention_generator(checkpoint, best=args.best)
-        discriminator = get_discriminator(checkpoint, best=args.best)
+        attention_generator = get_attention_generator(checkpoint)
+        discriminator = get_discriminator(checkpoint)
         _args = AttrDict(checkpoint['args'])
         path = get_dset_path(_args.dataset_name, args.dset_type)
         _, loader = data_loader(_args, path, shuffle=False)
         ade, fde, mean_d_real, std_d_real, mean_d_fake, std_d_fake = evaluate(    
-            _args, loader, force_generator, intention_generator, discriminator, 
+            _args, loader, attention_generator, discriminator,
             args.num_samples, plot=args.plot, plot_dir=args.plot_dir, dset_type=args.dset_type)
         print('Dataset: {}, Pred Len: {}, ADE: {:.2f}, FDE: {:.2f}'.format(
             _args.dataset_name, _args.pred_len, ade, fde))
@@ -264,5 +259,4 @@ def main(args):
 if __name__ == '__main__':
     args = parser.parse_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = '0'
-    print(torch.cuda.is_available())
     main(args)
