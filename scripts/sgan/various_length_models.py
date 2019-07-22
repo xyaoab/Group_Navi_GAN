@@ -345,7 +345,7 @@ class PoolHiddenNet(nn.Module):
     """Pooling module as proposed in our paper"""
     def __init__(
         self, embedding_dim=64, h_dim=64, mlp_dim=1024, bottleneck_dim=1024,
-        activation='relu', batch_norm=True, dropout=0.0
+        activation='relu', batch_norm=True, dropout=0.0, group_pooling=False
     ):
         super(PoolHiddenNet, self).__init__()
 
@@ -363,6 +363,7 @@ class PoolHiddenNet(nn.Module):
             activation=activation,
             batch_norm=batch_norm,
             dropout=dropout)
+        self.group_pooling = group_pooling
 
     def repeat(self, tensor, num_reps):
         """
@@ -377,7 +378,23 @@ class PoolHiddenNet(nn.Module):
         tensor = tensor.view(-1, col_len)
         return tensor
 
-    def forward(self, h_states, seq_start_end, end_pos):
+        #get heading to pooling
+    def get_heading_difference(self, obs_traj_rel, _start, _end, dim):
+        start = _start
+        end = _end
+        #logger.info('[get_heading_difference]: obs_length is {}, count is {}'.format(obs_traj_rel.size(0), obs_length))
+        heading_mask = nn.init.eye_(torch.empty(end-start, end-start))
+        delta_x = obs_traj_rel[0,start:end, 0]  - obs_traj_rel[-1,start:end, 0] 
+        delta_y = obs_traj_rel[0,start:end, 1]  - obs_traj_rel[-1,start:end, 1] 
+        theta = torch.atan2(delta_x, delta_y)
+        for t in range(0,end-start-1):
+            for p in range(t+1, end-start):
+                angle = abs(torch.atan2(torch.sin(theta[t]-theta[p]), torch.cos(theta[t]-theta[p])))
+                heading_mask[t,p] = heading_mask[p,t] =torch.cos(angle)
+        mask = heading_mask.unsqueeze(2).repeat(1,1,dim).cuda()
+        return mask
+
+    def forward(self, h_states, seq_start_end, end_pos, obs_traj_rel):
         """
         Inputs:
         - h_states: Tensor of shape (num_layers, batch, h_dim)
@@ -403,7 +420,14 @@ class PoolHiddenNet(nn.Module):
             curr_rel_embedding = self.spatial_embedding(curr_rel_pos)
             mlp_h_input = torch.cat([curr_rel_embedding, curr_hidden_1], dim=1)
             curr_pool_h = self.mlp_pre_pool(mlp_h_input)
-            curr_pool_h = curr_pool_h.view(num_ped, num_ped, -1).max(1)[0]
+
+            #heading_mask
+            if self.group_pooling is True:
+                logger.info('group_pooling is applied {}'.format(self.group_pooling))
+                mask = self.get_heading_difference(obs_traj_rel, start, end, self.bottleneck_dim)
+            else:
+                mask = torch.ones(num_ped, num_ped,self.bottleneck_dim)
+            curr_pool_h = curr_pool_h.view(num_ped, num_ped, -1).mul(mask).max(1)[0]
             pool_h.append(curr_pool_h)
         pool_h = torch.cat(pool_h, dim=0)
         return pool_h
@@ -1365,7 +1389,7 @@ class LateAttentionFullGenerator(nn.Module):
         self, obs_len, pred_len, embedding_dim=64, encoder_h_dim=64,
         decoder_h_dim=128, mlp_dim=1024, num_layers=1, noise_dim=(0, ),
         noise_type='gaussian', noise_mix_type='ped', pooling_type=None,
-        pool_every_timestep=True, dropout=0.0, bottleneck_dim=1024,
+        group_pooling=False, pool_every_timestep=True, dropout=0.0, bottleneck_dim=1024,
         activation='relu', batch_norm=True, neighborhood_size=2.0, grid_size=8, goal_dim=(2,), spatial_dim=True
     ):
         super(LateAttentionFullGenerator, self).__init__()
@@ -1442,7 +1466,8 @@ class LateAttentionFullGenerator(nn.Module):
                 mlp_dim=mlp_dim,
                 bottleneck_dim=bottleneck_dim,
                 activation=activation,
-                batch_norm=batch_norm
+                batch_norm=batch_norm,
+                group_pooling=group_pooling
             )
         elif pooling_type == 'spool':
             self.pool_net = SocialPooling(
@@ -1576,7 +1601,8 @@ class LateAttentionFullGenerator(nn.Module):
             return True
         else:
             return False
-
+    
+    
     def forward(self, obs_traj, obs_traj_rel, seq_start_end, aux_input=None, user_noise=None, goal_input=None, seq_len=8, gt_rel=None):
         """
         Inputs:
@@ -1596,7 +1622,7 @@ class LateAttentionFullGenerator(nn.Module):
         # Pool States
         if self.pooling_type:
             end_pos = obs_traj[-1, :, :]
-            pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos)
+            pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos, obs_traj_rel)
             # Construct input hidden states for decoder
             force_mlp_decoder_context_input = torch.cat(
                 [force_final_encoder_h.view(-1, self.encoder_h_dim), pool_h], dim=1)

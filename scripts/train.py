@@ -64,6 +64,7 @@ parser.add_argument('--pool_every_timestep', default=1, type=bool_flag)
 
 # Pool Net Option
 parser.add_argument('--bottleneck_dim', default=1024, type=int)
+parser.add_argument('--group_pooling', default=False, type=bool)
 
 # Social Pooling Options
 parser.add_argument('--neighborhood_size', default=2.0, type=float)
@@ -177,6 +178,8 @@ def main(args):
         noise_type=args.noise_type,
         noise_mix_type=args.noise_mix_type,
         pooling_type=args.pooling_type,
+        #new group navi gan
+        group_pooling=args.group_pooling,
         pool_every_timestep=args.pool_every_timestep,
         dropout=args.dropout,
         bottleneck_dim=args.bottleneck_dim,
