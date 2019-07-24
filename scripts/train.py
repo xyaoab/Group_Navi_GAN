@@ -752,7 +752,7 @@ def get_heading_difference(obs_traj_rel, _count, _start, _end):
     theta = torch.atan2(delta_x, delta_y)
     for t in range(0,end-start-1):
         for p in range(t+1, end-start):
-            angle = abs(torch.atan2(torch.sin(theta[t]-theta[p]), torch.cos(theta[t]-theta[p])))
+            angle = torch.abs(torch.atan2(torch.sin(theta[t]-theta[p]), torch.cos(theta[t]-theta[p])))
             heading_mask[t,p] = heading_mask[p,t] =torch.cos(angle)
     mask = heading_mask.unsqueeze(0).repeat(obs_length,1,1)
     return mask

@@ -382,7 +382,6 @@ class PoolHiddenNet(nn.Module):
     def get_heading_difference(self, obs_traj_rel, _start, _end, dim):
         start = _start
         end = _end
-        #logger.info('[get_heading_difference]: obs_length is {}, count is {}'.format(obs_traj_rel.size(0), obs_length))
         heading_mask = nn.init.eye_(torch.empty(end-start, end-start))
         delta_x = obs_traj_rel[0,start:end, 0]  - obs_traj_rel[-1,start:end, 0] 
         delta_y = obs_traj_rel[0,start:end, 1]  - obs_traj_rel[-1,start:end, 1] 
@@ -423,10 +422,13 @@ class PoolHiddenNet(nn.Module):
 
             #heading_mask
             if self.group_pooling is True:
-                logger.info('group_pooling is applied {}'.format(self.group_pooling))
+                #logger.info('group_pooling is applied {}'.format(self.group_pooling))
+                #print('group_pooling is applied {}'.format(self.group_pooling))
                 mask = self.get_heading_difference(obs_traj_rel, start, end, self.bottleneck_dim)
             else:
-                mask = torch.ones(num_ped, num_ped,self.bottleneck_dim)
+                mask = torch.ones(num_ped, num_ped,self.bottleneck_dim).cuda()
+            #print(mask.type())
+            #print(curr_pool_h.type())
             curr_pool_h = curr_pool_h.view(num_ped, num_ped, -1).mul(mask).max(1)[0]
             pool_h.append(curr_pool_h)
         pool_h = torch.cat(pool_h, dim=0)

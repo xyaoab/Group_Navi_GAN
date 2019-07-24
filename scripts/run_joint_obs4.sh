@@ -21,6 +21,7 @@ python3 scripts/train.py \
   --intention_loss_type 'l2'\
   --batch_norm 0 \
   --dropout 0 \
+  --timing 1 \
   --batch_size 64 \
   --g_learning_rate 5e-3 \
   --g_steps 1 \
@@ -31,14 +32,15 @@ python3 scripts/train.py \
   --num_iterations 10000 \
   --num_epochs 500 \
   --pooling_type 'pool_net' \
+  --group_pooling True \
   --clipping_threshold_g 1.5 \
   --best_k 1 \
   --gpu_num 0 \
-  --checkpoint_name headingloss_zara1_batch32_epoch500_poolnet \
+  --checkpoint_name groupnet_zara1_batch64_epoch500_poolnet \
   --restore_from_checkpoint 1 \
   --output_dir './models' \
   --benchmark True \
   --spatial_dim True \
   --resist_loss_weight 1 \
-  --resist_loss_heading 1 \
-  2>&1 | tee training_headingloss_batch32_epoch500_poolnet.log
+  --resist_loss_heading 0 \
+  2>&1 | tee training_groupnet_batch64_epoch500_poolnet.log

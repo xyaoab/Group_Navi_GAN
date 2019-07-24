@@ -123,20 +123,18 @@ def evaluate(
             ade, fde = [], []
             total_traj += pred_traj_gt.size(1)
 
-            for _ in range(num_samples):
-                logger.info(num_samples)
+            for sample in range(num_samples):
+                
                 pred_traj_fake_rel, _ = attention_generator(
                 obs_traj, obs_traj_rel, seq_start_end, seq_len=attention_generator.pred_len, goal_input=goals_rel)
         
             
                 pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
-
-                ade.append(displacement_error(
-                    pred_traj_fake, pred_traj_gt, mode='raw'
-                ))
-                fde.append(final_displacement_error(
-                    pred_traj_fake[-1], pred_traj_gt[-1], mode='raw'
-                ))
+                ade.append(displacement_error(pred_traj_fake, pred_traj_gt, mode='raw'))
+                fde.append(final_displacement_error(pred_traj_fake[-1], pred_traj_gt[-1], mode='raw'))
+                
+                
+                
                 scores_real = discriminator(
                    torch.cat([obs_traj, pred_traj_gt], dim=0),
                    torch.cat([obs_traj_rel, pred_traj_gt_rel], dim=0),
@@ -215,8 +213,8 @@ def evaluate(
             ade_outer.append(ade_sum)
             fde_outer.append(fde_sum)
                 
-            logger.info('ade is {:.2f}'.format(len(ade_outer)))
-            logger.info('fde is {:.2f}'.format(len(fde_outer)))
+            #logger.info('ade is {}'.format(ade_outer))
+            #logger.info('fde is {}'.format(fde_outer))
             
         ade = sum(ade_outer) / (total_traj * args.pred_len)
         fde = sum(fde_outer) / (total_traj)
