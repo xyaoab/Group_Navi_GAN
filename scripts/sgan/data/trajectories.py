@@ -37,6 +37,86 @@ def seq_collate(data):
 
     return tuple(out)
 
+def row_repeat( tensor, num_reps):
+    """
+    Inputs:
+    -tensor: 2D tensor of any shape
+    -num_reps: Number of times to repeat each row
+    Outpus:
+    -repeat_tensor: Repeat each row such that: R1, R1, R2, R2
+    """
+    col_len = tensor.size(1)
+    tensor = tensor.unsqueeze(dim=1).repeat(1, num_reps, 1)
+    tensor = tensor.view(-1, col_len)
+    return tensor
+## for adding angle, velocity, position differnece
+def seq_delta_collate(data):
+    path = '/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/libsvm'
+    sys.path.append(path)
+    from svmutil import *
+
+    (obs_seq_list, pred_seq_list, obs_seq_rel_list, pred_seq_rel_list,
+     non_linear_ped_list, loss_mask_list, goals_list, goals_rel_list) = zip(*data)
+
+    _len = [len(seq) for seq in obs_seq_list]
+    cum_start_idx = [0] + np.cumsum(_len).tolist()
+    seq_start_end = [[start, end]
+                     for start, end in zip(cum_start_idx, cum_start_idx[1:])]
+    delta_size = (seq_start_end[:,1] - seq_start_end[:,0]).max()
+    # 3, batch, delta_size
+
+    # Data format: batch, input_size, seq_len
+    # LSTM input format: seq_len, batch, input_size
+    obs_traj = torch.cat(obs_seq_list, dim=0).permute(2, 0, 1)
+    pred_traj = torch.cat(pred_seq_list, dim=0).permute(2, 0, 1)
+    obs_traj_rel = torch.cat(obs_seq_rel_list, dim=0).permute(2, 0, 1)
+    pred_traj_rel = torch.cat(pred_seq_rel_list, dim=0).permute(2, 0, 1)
+    goals = torch.cat(goals_list, dim=0).permute(2, 0, 1)
+    goals_rel = torch.cat(goals_rel_list, dim=0).permute(2, 0, 1)
+    non_linear_ped = torch.cat(non_linear_ped_list)
+    loss_mask = torch.cat(loss_mask_list, dim=0)
+    seq_start_end = torch.LongTensor(seq_start_end)
+    obs_delta = torch.zeros(4, obs_traj.size(1), delta_size)
+
+    model = svm_load_model('//data/xinjiey/Group_Navi_GAN/spencer/group/social_relationships/groups_probabilistic_small.model')
+    
+    # adding delta
+    for start, end in seq_start_end:
+        end = end.item()
+        start = start.item()
+        num_ped = end - start
+        end_pos = obs_traj_rel[-1, start:end, :]
+
+        # r1,r1,r1, r2,r2,r2, r3,r3,r3 - r1,r2,r3, r1,r2,r3, r1,r2,r3
+        end_pos_difference = row_repeat(end_pos, num_ped) - end_pos.repeat(num_ped, 1)
+        end_displacement = obs_traj_rel[-1,start:end,:] - obs_traj_rel[-2,start:end,:] / 0.4
+        end_speed = torch.sqrt(torch.sum(end_displacement**2, dim=1)).view(-1,1)
+
+        end_speed_difference =  row_repeat(end_speed, num_ped) - end_speed.repeat(num_ped, 1)
+        end_heading = torch.atan2(end_displacement[:,0], end_displacement[:,1]).view(-1,1)
+        end_heading_difference =  row_repeat(end_heading, num_ped) - end_heading.repeat(num_ped, 1)
+        # num_ped**2
+        delta_distance = torch.sqrt(torch.sum(end_pos_difference**2, dim=1))
+        # num_ped
+        delta_speed = torch.abs(end_speed_difference)
+        delta_heading = torch.abs(torch.atan2(torch.sin(end_heading_difference), torch.cos(end_heading_difference)))
+       
+        _x = torch.cat((delta_distance, delta_speed, delta_heading),1)
+        _, _, prob = svm_predict([], _x.tolist(), model,'-b 1')
+        prob = torch.FloatTensor(prob)[:,0]
+        #positive prob >0.5 consider group relationship 
+        obs_delta[3, start:end, :num_ped] = (prob>0.5).long().view(num_ped, num_ped)
+        obs_delta[0, start:end, :num_ped] = delta_distance.view(num_ped, num_ped)
+        obs_delta[1, start:end, :num_ped] = delta_speed.view(num_ped, num_ped)
+        obs_delta[2, start:end, :num_ped] = delta_heading.view(num_ped, num_ped)
+
+            
+    out = [
+        obs_traj, pred_traj, obs_traj_rel, pred_traj_rel, non_linear_ped,
+        loss_mask, seq_start_end, goals, goals_rel, obs_delta
+    ]
+
+    return tuple(out)
 
 def read_file(_path, delim='\t'):
     data = []

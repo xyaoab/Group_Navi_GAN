@@ -35,6 +35,7 @@ parser.add_argument('--loader_num_workers', default=4, type=int)
 parser.add_argument('--obs_len', default=8, type=int)
 parser.add_argument('--pred_len', default=8, type=int)
 parser.add_argument('--skip', default=1, type=int)
+parser.add_argument('--delta', default=False, type=bool)
 
 # Optimization
 parser.add_argument('--batch_size', default=64, type=int)
@@ -130,13 +131,13 @@ def main(args):
     long_dtype, float_dtype = get_dtypes(args)
 
     logger.info("Initializing train dataset")
-    train_dset, train_loader = data_loader(args, train_path)
+    train_dset, train_loader = data_loader(args, train_path, delta=args.delta)
     logger.info("Initializing val dataset")
-    _, val_loader = data_loader(args, val_path)
+    _, val_loader = data_loader(args, val_path, delta=args.delta)
 
     # For benchmarking
     if args.benchmark:
-        _, test_loader = data_loader(args, get_dset_path(args.dataset_name, 'test'))
+        _, test_loader = data_loader(args, get_dset_path(args.dataset_name, 'test'), delta=args.delta)
         best_ade = float('inf')
         best_fde = float('inf')
 
@@ -446,14 +447,18 @@ def generator_step(
     args, batch, attention_generator, discriminator, g_loss_fn, optimizer_g
 ):
     batch = [tensor.cuda() for tensor in batch]
-    (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped,
-     loss_mask, seq_start_end, goals, goals_rel) = batch
+    if args.group_pooling is True:
+        (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
+        loss_mask, seq_start_end, goals, goals_rel obs_delta) = batch
+    else:
+        (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
+        loss_mask, seq_start_end, goals, goals_rel) = batch
 
     """
     Re-sample random length observation (prepend) and random length prediction
     """
 
-    old_obs_len = obs_traj.shape[0]  # 8*999*2
+    old_obs_len = obs_traj.shape[0]  
     old_pred_len = pred_traj_gt.shape[0]
 
     obs_len = np.random.randint(4)+4
@@ -515,7 +520,7 @@ def generator_step(
         for _ in range(args.best_k):
             gt_rel = None
             
-            pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, seq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
+            pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, obs_delta=obs_delta, eq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
             #logger.info('[after flipping] obs_traj: {}; pred_traj_fake_rel: {}'.format(obs_traj.size(0), pred_traj_fake_rel.size(0)))
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
@@ -530,17 +535,21 @@ def generator_step(
             if args.resist_loss_weight > 0:
                 for start, end in seq_start_end.data:
                     count = pred_traj_gt.size(0)
-                    heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
+                    if args.resist_loss_heading == 1:
+                        heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
                     for t in range(start, end):
                         if t == start:
                             distance = pred_traj_gt[:,t+1:end,:].clone()
-                            mask  = heading_mask [:, 0, 1:].clone()
+                            if args.resist_loss_heading == 1:
+                                mask  = heading_mask [:, 0, 1:].clone()
                         elif t == end-1:
                             distance = pred_traj_gt[:,start:t,:].clone()
-                            mask  = heading_mask [:, -1, :-1].clone()
+                            if args.resist_loss_heading == 1:
+                                mask  = heading_mask [:, -1, :-1].clone()
                         else:
                             distance = torch.cat((pred_traj_gt[:,start:t,:], pred_traj_gt[:,t+1:end,:]), 1).clone()
-                            mask = torch.cat((heading_mask[:, t-start, 0:t-start], heading_mask [:,t-start, t+1-start:]), 1).clone() # 8*seq
+                            if args.resist_loss_heading == 1:
+                                mask = torch.cat((heading_mask[:, t-start, 0:t-start], heading_mask [:,t-start, t+1-start:]), 1).clone() # 8*seq
 
                         distance -= pred_traj_gt[:,t,:].view(-1,1,2)
                         if args.resist_loss_heading == 1:
@@ -601,16 +610,25 @@ def check_accuracy(
     with torch.no_grad():
         for batch in loader:
             batch = [tensor.cuda() for tensor in batch]
-            (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel,
-             non_linear_ped, loss_mask, seq_start_end, goals, goals_rel) = batch
+            if args.group_pooling is True:
+                (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
+                loss_mask, seq_start_end, goals, goals_rel obs_delta) = batch
+            else:
+                (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
+                loss_mask, seq_start_end, goals, goals_rel) = batch
+
             goals = pred_traj_gt[-1,:,:]
             goals_rel = goals - obs_traj[0,:,:]
             linear_ped = 1 - non_linear_ped
             loss_mask = loss_mask[:, args.obs_len:]
-
-            pred_traj_fake_rel, _ = attention_generator(
-                obs_traj, obs_traj_rel, seq_start_end, seq_len=attention_generator.pred_len, goal_input=goals_rel
-            )
+            if args.group_pooling is True:
+                pred_traj_fake_rel, _ = attention_generator(
+                    obs_traj, obs_traj_rel, seq_start_end, obs_delta = obs_delta, seq_len=attention_generator.pred_len, goal_input=goals_rel
+                )
+            else:
+                pred_traj_fake_rel, _ = attention_generator(
+                    obs_traj, obs_traj_rel, seq_start_end, obs_delta = None, seq_len=attention_generator.pred_len, goal_input=goals_rel
+                )
         
             
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
@@ -630,17 +648,21 @@ def check_accuracy(
             #################### RESIST LOSS ###################
             for start, end in seq_start_end.data:
                 count = pred_traj_gt.size(0)
-                heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
+                if args.resist_loss_heading == 1:
+                    heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
                 for t in range(start, end):
                     if t == start:
                         distance = pred_traj_gt[:,t+1:end,:].clone()
-                        mask  = heading_mask [:, 0, 1:].clone()
+                        if args.resist_loss_heading == 1:
+                            mask  = heading_mask [:, 0, 1:].clone()
                     elif t == end-1:
                         distance = pred_traj_gt[:,start:t,:].clone()
-                        mask  = heading_mask [:, -1, :-1].clone()
+                        if args.resist_loss_heading == 1:
+                            mask  = heading_mask [:, -1, :-1].clone()
                     else:
                         distance = torch.cat((pred_traj_gt[:,start:t,:], pred_traj_gt[:,t+1:end,:]), 1).clone()
-                        mask = torch.cat((heading_mask[:, t-start, 0:t-start], heading_mask [:,t-start, t+1-start:]), 1).clone() # 8*seq
+                        if args.resist_loss_heading == 1:
+                            mask = torch.cat((heading_mask[:, t-start, 0:t-start], heading_mask [:,t-start, t+1-start:]), 1).clone() # 8*seq
 
                     distance -= pred_traj_gt[:,t,:].view(-1,1,2)
                     if args.resist_loss_heading == 1:

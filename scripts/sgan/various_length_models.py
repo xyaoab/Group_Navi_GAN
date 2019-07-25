@@ -135,7 +135,7 @@ class Decoder(nn.Module):
         """
         return self.state_seq
 
-    def forward(self, last_pos, last_pos_rel, state_tuple, seq_start_end, seq_len=12):
+    def forward(self, last_pos, last_pos_rel, state_tuple, seq_start_end, seq_len=8):
         """
         Inputs:
         - last_pos: Tensor of shape (batch, 2)
@@ -206,7 +206,7 @@ class Decoder(nn.Module):
 
         return rel_pos, state_tuple
 
-
+'''
 class Delta_Decoder(nn.Module):
     """
     Decoder is part of TrajectoryGenerator
@@ -340,7 +340,7 @@ class Delta_Decoder(nn.Module):
             state_tuple = (decoder_h, state_tuple[1])
 
         return rel_pos, state_tuple
-
+'''
 class PoolHiddenNet(nn.Module):
     """Pooling module as proposed in our paper"""
     def __init__(
@@ -393,7 +393,7 @@ class PoolHiddenNet(nn.Module):
         mask = heading_mask.unsqueeze(2).repeat(1,1,dim).cuda()
         return mask
 
-    def forward(self, h_states, seq_start_end, end_pos, obs_traj_rel):
+    def forward(self, h_states, seq_start_end, end_pos, obs_delta=None):
         """
         Inputs:
         - h_states: Tensor of shape (num_layers, batch, h_dim)
@@ -422,13 +422,12 @@ class PoolHiddenNet(nn.Module):
 
             #heading_mask
             if self.group_pooling is True:
-                #logger.info('group_pooling is applied {}'.format(self.group_pooling))
-                #print('group_pooling is applied {}'.format(self.group_pooling))
-                mask = self.get_heading_difference(obs_traj_rel, start, end, self.bottleneck_dim)
+                assert obs_delta is not None
+                #mask = self.get_heading_difference(obs_traj_rel, start, end, self.bottleneck_dim)
+                mask = obs_delta[3,:,:].unsqueeze(2).repeat(1,1,self.bottleneck_dim)
             else:
                 mask = torch.ones(num_ped, num_ped,self.bottleneck_dim).cuda()
-            #print(mask.type())
-            #print(curr_pool_h.type())
+
             curr_pool_h = curr_pool_h.view(num_ped, num_ped, -1).mul(mask).max(1)[0]
             pool_h.append(curr_pool_h)
         pool_h = torch.cat(pool_h, dim=0)
@@ -555,7 +554,7 @@ class SocialPooling(nn.Module):
         pool_h = self.mlp_pool(pool_h)
         return pool_h
 
-
+'''
 class TrajectoryGenerator(nn.Module):
     def __init__(
         self, obs_len, pred_len, embedding_dim=64, encoder_h_dim=64,
@@ -819,7 +818,7 @@ class TrajectoryGenerator(nn.Module):
     #     )
     #     return rel_pos, state_tuple
 
-
+'''
 class TrajectoryDiscriminator(nn.Module):
     def __init__(
         self, obs_len, pred_len, embedding_dim=64, h_dim=64, mlp_dim=1024,
@@ -1064,7 +1063,7 @@ class TrajectoryIntention(nn.Module):
             seq_start_end,
         )
         return rel_pos, state_tuple
-
+'''
 class LateAttentionGenerator(nn.Module):
     def __init__(
         self, obs_len, pred_len, embedding_dim=64, encoder_h_dim=64,
@@ -1382,7 +1381,7 @@ class LateAttentionGenerator(nn.Module):
 
         
         return torch.stack(ret)
-    
+'''
 
     
 # use intention output as social input
@@ -1415,6 +1414,7 @@ class LateAttentionFullGenerator(nn.Module):
         self.pool_every_timestep = pool_every_timestep
         self.bottleneck_dim = 1024
         self.goal_dim = goal_dim
+        self.group_pooling = group_pooling
         
         self.intention_encoder = Encoder(
             embedding_dim=embedding_dim,
@@ -1605,7 +1605,7 @@ class LateAttentionFullGenerator(nn.Module):
             return False
     
     
-    def forward(self, obs_traj, obs_traj_rel, seq_start_end, aux_input=None, user_noise=None, goal_input=None, seq_len=8, gt_rel=None):
+    def forward(self, obs_traj, obs_traj_rel, seq_start_end, obs_delta=None, aux_input=None, user_noise=None, goal_input=None, seq_len=8, gt_rel=None):
         """
         Inputs:
         - obs_traj: Tensor of shape (obs_len, batch, 2)
@@ -1624,7 +1624,11 @@ class LateAttentionFullGenerator(nn.Module):
         # Pool States
         if self.pooling_type:
             end_pos = obs_traj[-1, :, :]
-            pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos, obs_traj_rel)
+            if args.group_pooling is True:
+                pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos, obs_traj_rel, obs_delta=obs_delta)
+            else:
+                pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos, obs_traj_rel)
+           
             # Construct input hidden states for decoder
             force_mlp_decoder_context_input = torch.cat(
                 [force_final_encoder_h.view(-1, self.encoder_h_dim), pool_h], dim=1)
@@ -1724,7 +1728,7 @@ class LateAttentionFullGenerator(nn.Module):
         return (torch.stack(ret), [torch.stack(attention), torch.stack(intent), torch.stack(social)])
     
 
-    
+'''   
 class LateAttentionFullLineGenerator(nn.Module):
     def __init__(
         self, obs_len, pred_len, embedding_dim=64, encoder_h_dim=64,
@@ -1976,5 +1980,5 @@ class LateAttentionFullLineGenerator(nn.Module):
         
         return (torch.stack(ret), [torch.stack(attention), torch.stack(intent), torch.stack(social)])
     
-
+'''
     
