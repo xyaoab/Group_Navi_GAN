@@ -36,11 +36,11 @@ python3 scripts/train.py \
   --clipping_threshold_g 1.5 \
   --best_k 1 \
   --gpu_num 0 \
-  --checkpoint_name groupnet_zara1_batch64_epoch500_poolnet \
-  --restore_from_checkpoint 1 \
+  --checkpoint_name svmgroup_zara1_batch64_epoch500_poolnet \
+  --restore_from_checkpoint 0 \
   --output_dir './models' \
   --benchmark True \
   --spatial_dim True \
   --resist_loss_weight 1 \
   --resist_loss_heading 0 \
-  2>&1 | tee training_groupnet_batch64_epoch500_poolnet.log
+  2>&1 | tee training_svmgroup_batch64_epoch500_poolnet.log
