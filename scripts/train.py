@@ -449,7 +449,7 @@ def generator_step(
     batch = [tensor.cuda() for tensor in batch]
     if args.group_pooling is True:
         (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
-        loss_mask, seq_start_end, goals, goals_rel obs_delta) = batch
+        loss_mask, seq_start_end, goals, goals_rel, obs_delta) = batch
     else:
         (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
         loss_mask, seq_start_end, goals, goals_rel) = batch
@@ -520,7 +520,7 @@ def generator_step(
         for _ in range(args.best_k):
             gt_rel = None
             
-            pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, obs_delta=obs_delta, eq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
+            pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in=obs_delta, seq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
             #logger.info('[after flipping] obs_traj: {}; pred_traj_fake_rel: {}'.format(obs_traj.size(0), pred_traj_fake_rel.size(0)))
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
@@ -612,7 +612,7 @@ def check_accuracy(
             batch = [tensor.cuda() for tensor in batch]
             if args.group_pooling is True:
                 (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
-                loss_mask, seq_start_end, goals, goals_rel obs_delta) = batch
+                loss_mask, seq_start_end, goals, goals_rel, obs_delta) = batch
             else:
                 (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
                 loss_mask, seq_start_end, goals, goals_rel) = batch
@@ -623,11 +623,11 @@ def check_accuracy(
             loss_mask = loss_mask[:, args.obs_len:]
             if args.group_pooling is True:
                 pred_traj_fake_rel, _ = attention_generator(
-                    obs_traj, obs_traj_rel, seq_start_end, obs_delta = obs_delta, seq_len=attention_generator.pred_len, goal_input=goals_rel
+                    obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = obs_delta, seq_len=attention_generator.pred_len, goal_input=goals_rel
                 )
             else:
                 pred_traj_fake_rel, _ = attention_generator(
-                    obs_traj, obs_traj_rel, seq_start_end, obs_delta = None, seq_len=attention_generator.pred_len, goal_input=goals_rel
+                    obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = None, seq_len=attention_generator.pred_len, goal_input=goals_rel
                 )
         
             

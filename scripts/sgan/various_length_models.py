@@ -393,7 +393,7 @@ class PoolHiddenNet(nn.Module):
         mask = heading_mask.unsqueeze(2).repeat(1,1,dim).cuda()
         return mask
 
-    def forward(self, h_states, seq_start_end, end_pos, obs_delta=None):
+    def forward(self, h_states, seq_start_end, end_pos, obs_traj_rel=None, _obs_delta_poolnet=None):
         """
         Inputs:
         - h_states: Tensor of shape (num_layers, batch, h_dim)
@@ -422,9 +422,11 @@ class PoolHiddenNet(nn.Module):
 
             #heading_mask
             if self.group_pooling is True:
-                assert obs_delta is not None
+                assert _obs_delta_poolnet is not None
                 #mask = self.get_heading_difference(obs_traj_rel, start, end, self.bottleneck_dim)
-                mask = obs_delta[3,:,:].unsqueeze(2).repeat(1,1,self.bottleneck_dim)
+               # print(_obs_delta_poolnet[3,start:end,0:num_ped].size())
+                mask = _obs_delta_poolnet[3,start:end,0:num_ped].unsqueeze(2).repeat(1,1,self.bottleneck_dim)
+                #print(mask.size())
             else:
                 mask = torch.ones(num_ped, num_ped,self.bottleneck_dim).cuda()
 
@@ -1605,7 +1607,7 @@ class LateAttentionFullGenerator(nn.Module):
             return False
     
     
-    def forward(self, obs_traj, obs_traj_rel, seq_start_end, obs_delta=None, aux_input=None, user_noise=None, goal_input=None, seq_len=8, gt_rel=None):
+    def forward(self, obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in=None, aux_input=None, user_noise=None, goal_input=None, seq_len=8, gt_rel=None):
         """
         Inputs:
         - obs_traj: Tensor of shape (obs_len, batch, 2)
@@ -1624,8 +1626,8 @@ class LateAttentionFullGenerator(nn.Module):
         # Pool States
         if self.pooling_type:
             end_pos = obs_traj[-1, :, :]
-            if args.group_pooling is True:
-                pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos, obs_traj_rel, obs_delta=obs_delta)
+            if self.group_pooling is True:
+                pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos, obs_traj_rel, _obs_delta_in)
             else:
                 pool_h = self.pool_net(force_final_encoder_h, seq_start_end, end_pos, obs_traj_rel)
            

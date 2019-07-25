@@ -6,9 +6,11 @@ import numpy as np
 
 import torch
 from torch.utils.data import Dataset
-
+import sys
 logger = logging.getLogger(__name__)
-
+path = '/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/libsvm'
+sys.path.append(path)
+from svmutil import *
 
 def seq_collate(data):
     (obs_seq_list, pred_seq_list, obs_seq_rel_list, pred_seq_rel_list,
@@ -51,9 +53,7 @@ def row_repeat( tensor, num_reps):
     return tensor
 ## for adding angle, velocity, position differnece
 def seq_delta_collate(data):
-    path = '/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/libsvm'
-    sys.path.append(path)
-    from svmutil import *
+
 
     (obs_seq_list, pred_seq_list, obs_seq_rel_list, pred_seq_rel_list,
      non_linear_ped_list, loss_mask_list, goals_list, goals_rel_list) = zip(*data)
@@ -62,8 +62,8 @@ def seq_delta_collate(data):
     cum_start_idx = [0] + np.cumsum(_len).tolist()
     seq_start_end = [[start, end]
                      for start, end in zip(cum_start_idx, cum_start_idx[1:])]
-    delta_size = (seq_start_end[:,1] - seq_start_end[:,0]).max()
-    # 3, batch, delta_size
+    
+    
 
     # Data format: batch, input_size, seq_len
     # LSTM input format: seq_len, batch, input_size
@@ -76,6 +76,9 @@ def seq_delta_collate(data):
     non_linear_ped = torch.cat(non_linear_ped_list)
     loss_mask = torch.cat(loss_mask_list, dim=0)
     seq_start_end = torch.LongTensor(seq_start_end)
+    
+    delta_size = (seq_start_end[:,1] - seq_start_end[:,0]).max()
+    # 4, batch, delta_size
     obs_delta = torch.zeros(4, obs_traj.size(1), delta_size)
 
     model = svm_load_model('//data/xinjiey/Group_Navi_GAN/spencer/group/social_relationships/groups_probabilistic_small.model')
@@ -96,13 +99,13 @@ def seq_delta_collate(data):
         end_heading = torch.atan2(end_displacement[:,0], end_displacement[:,1]).view(-1,1)
         end_heading_difference =  row_repeat(end_heading, num_ped) - end_heading.repeat(num_ped, 1)
         # num_ped**2
-        delta_distance = torch.sqrt(torch.sum(end_pos_difference**2, dim=1))
+        delta_distance = torch.sqrt(torch.sum(end_pos_difference**2, dim=1)).view(-1,1)
         # num_ped
         delta_speed = torch.abs(end_speed_difference)
         delta_heading = torch.abs(torch.atan2(torch.sin(end_heading_difference), torch.cos(end_heading_difference)))
        
         _x = torch.cat((delta_distance, delta_speed, delta_heading),1)
-        _, _, prob = svm_predict([], _x.tolist(), model,'-b 1')
+        _, _, prob = svm_predict([], _x.tolist(), model,'-b 1 -q')
         prob = torch.FloatTensor(prob)[:,0]
         #positive prob >0.5 consider group relationship 
         obs_delta[3, start:end, :num_ped] = (prob>0.5).long().view(num_ped, num_ped)

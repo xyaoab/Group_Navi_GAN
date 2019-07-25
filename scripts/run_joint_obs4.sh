@@ -4,6 +4,7 @@ python3 scripts/train.py \
   --delim tab \
   --loader_num_workers 8 \
   --d_type 'local' \
+  --delta True \
   --pred_len 8 \
   --encoder_h_dim_g 32 \
   --encoder_h_dim_d 64\
