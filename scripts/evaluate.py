@@ -69,6 +69,7 @@ def get_attention_generator(checkpoint, best=False):
         noise_type=args.noise_type,
         noise_mix_type=args.noise_mix_type,
         pooling_type=args.pooling_type,
+        group_pooling=agrs.group_pooling,
         pool_every_timestep=args.pool_every_timestep,
         dropout=args.dropout,
         bottleneck_dim=args.bottleneck_dim,
@@ -113,8 +114,13 @@ def evaluate(
             print('evaluating batch {}...'.format(count))
             count += 1
             batch = [tensor.cuda() for tensor in batch]
-            (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel,
-             non_linear_ped, loss_mask, seq_start_end, goals, goals_rel) = batch
+            if args.delta is True:
+                (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
+                loss_mask, seq_start_end, goals, goals_rel, obs_delta) = batch
+            else:
+                (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
+                loss_mask, seq_start_end, goals, goals_rel) = batch
+
             goals = pred_traj_gt[-1,:,:]
             goals_rel = goals - obs_traj[0,:,:]
             
@@ -125,10 +131,15 @@ def evaluate(
 
             for sample in range(num_samples):
                 
-                pred_traj_fake_rel, _ = attention_generator(
-                obs_traj, obs_traj_rel, seq_start_end, seq_len=attention_generator.pred_len, goal_input=goals_rel)
+                if args.group_pooling is True:
+                    pred_traj_fake_rel, _ = attention_generator(
+                        obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = obs_delta, seq_len=attention_generator.pred_len, goal_input=goals_rel
+                    )
+                else:
+                    pred_traj_fake_rel, _ = attention_generator(
+                        obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = None, seq_len=attention_generator.pred_len, goal_input=goals_rel
+                    )
         
-            
                 pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
                 ade.append(displacement_error(pred_traj_fake, pred_traj_gt, mode='raw'))
                 fde.append(final_displacement_error(pred_traj_fake[-1], pred_traj_gt[-1], mode='raw'))
@@ -244,7 +255,7 @@ def main(args):
         discriminator = get_discriminator(checkpoint)
         _args = AttrDict(checkpoint['args'])
         path = get_dset_path(_args.dataset_name, args.dset_type)
-        _, loader = data_loader(_args, path, shuffle=False)
+        _, loader = data_loader(_args, path, shuffle=False, delta=_args.delta)
         ade, fde, mean_d_real, std_d_real, mean_d_fake, std_d_fake = evaluate(    
             _args, loader, attention_generator, discriminator,
             args.num_samples, plot=args.plot, plot_dir=args.plot_dir, dset_type=args.dset_type)

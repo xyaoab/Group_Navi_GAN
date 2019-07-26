@@ -447,7 +447,7 @@ def generator_step(
     args, batch, attention_generator, discriminator, g_loss_fn, optimizer_g
 ):
     batch = [tensor.cuda() for tensor in batch]
-    if args.group_pooling is True:
+    if args.delta is True:
         (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
         loss_mask, seq_start_end, goals, goals_rel, obs_delta) = batch
     else:
@@ -610,7 +610,7 @@ def check_accuracy(
     with torch.no_grad():
         for batch in loader:
             batch = [tensor.cuda() for tensor in batch]
-            if args.group_pooling is True:
+            if args.delta is True:
                 (obs_traj, pred_traj_gt, obs_traj_rel, pred_traj_gt_rel, non_linear_ped, \
                 loss_mask, seq_start_end, goals, goals_rel, obs_delta) = batch
             else:
