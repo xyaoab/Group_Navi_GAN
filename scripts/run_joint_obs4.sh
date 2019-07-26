@@ -38,7 +38,7 @@ python3 scripts/train.py \
   --best_k 1 \
   --gpu_num 0 \
   --checkpoint_name svmgroup_zara1_batch64_epoch500_poolnet \
-  --restore_from_checkpoint 0 \
+  --restore_from_checkpoint 1 \
   --output_dir './models' \
   --benchmark True \
   --spatial_dim True \
