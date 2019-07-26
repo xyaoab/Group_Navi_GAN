@@ -16,6 +16,10 @@ torch.backends.cudnn.benchmark = True
 from sgan.data.loader import data_loader
 
 
+path = '/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/libsvm'
+sys.path.append(path)
+from svmutil import *
+
 from sgan.various_length_models import TrajectoryDiscriminator,LateAttentionFullGenerator
 
 from sgan.losses import displacement_error, final_displacement_error
@@ -67,6 +71,7 @@ def get_attention_generator(checkpoint, best=False):
         noise_mix_type=args.noise_mix_type,
         pooling_type=args.pooling_type,
         pool_every_timestep=args.pool_every_timestep,
+        group_pooling=args.group_pooling,
         dropout=args.dropout,
         bottleneck_dim=args.bottleneck_dim,
         neighborhood_size=args.neighborhood_size,
@@ -81,7 +86,18 @@ def get_attention_generator(checkpoint, best=False):
     generator.train()
     return generator
 
-
+def row_repeat( tensor, num_reps):
+    """
+    Inputs:
+    -tensor: 2D tensor of any shape
+    -num_reps: Number of times to repeat each row
+    Outpus:
+    -repeat_tensor: Repeat each row such that: R1, R1, R2, R2
+    """
+    col_len = tensor.size(1)
+    tensor = tensor.unsqueeze(dim=1).repeat(1, num_reps, 1)
+    tensor = tensor.view(-1, col_len)
+    return tensor
 def evaluate_helper(error, seq_start_end):
     sum_ = 0
     error = torch.stack(error, dim=1)
@@ -97,7 +113,7 @@ def evaluate_helper(error, seq_start_end):
 
 
 def evaluate(
-        args, obs_traj, obs_traj_rel, pred_traj_gt, seq_start_end, goals, goals_rel, attention_generator, discriminator, plot_dir=None
+        args, obs_traj, obs_traj_rel, pred_traj_gt, seq_start_end, goals, goals_rel,  obs_delta, attention_generator, discriminator, plot_dir=None
     ):
     ade_outer, fde_outer = [], []
     total_traj = 0
@@ -109,10 +125,14 @@ def evaluate(
         #ade, fde = [], []
     
 
-        pred_traj_fake_rel, _ = attention_generator(
-        obs_traj, obs_traj_rel, seq_start_end, seq_len=attention_generator.pred_len, goal_input=goals_rel)
-
-
+        if args.delta is True:
+            pred_traj_fake_rel, _ = attention_generator(
+                obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = obs_delta, seq_len=attention_generator.pred_len, goal_input=goals_rel
+            )
+        else:
+            pred_traj_fake_rel, _ = attention_generator(
+                obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = None, seq_len=attention_generator.pred_len, goal_input=goals_rel
+            )
         pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
         #ade.append(displacement_error(pred_traj_fake, pred_traj_gt, mode='raw'))
         #fde.append(final_displacement_error(pred_traj_fake[-1], pred_traj_gt[-1], mode='raw'))
@@ -206,29 +226,50 @@ def main(args):
         attention_generator = get_attention_generator(checkpoint)
         discriminator = get_discriminator(checkpoint)
         _args = AttrDict(checkpoint['args'])
-        obs_traj = torch.ones([8, 7, 2], dtype=torch.float32).cuda()
+        try:
+            _args.delta
+        except AttributeError:
+             _args.delta = False
+        num_ped =7
+        obs_traj = torch.ones([8, num_ped, 2], dtype=torch.float32).cuda()
 
-        obs_traj_rel = torch.ones([8, 7, 2], dtype=torch.float32).cuda()
-        pred_traj_gt = torch.ones([8, 7, 2], dtype=torch.float32).cuda()
-        goals = torch.ones([1, 7, 2], dtype=torch.float32).cuda()
-        goals_rel = torch.ones([1, 7, 2], dtype=torch.float32).cuda()
+        obs_traj_rel = torch.ones([8, num_ped, 2], dtype=torch.float32).cuda()
+        pred_traj_gt = torch.ones([8, num_ped, 2], dtype=torch.float32).cuda()
+        goals = torch.ones([1, num_ped, 2], dtype=torch.float32).cuda()
+        goals_rel = torch.ones([1, num_ped, 2], dtype=torch.float32).cuda()
+        obs_delta = torch.zeros([4, num_ped, num_ped], dtype=torch.float32).cuda()
         
         for t in range(8):
-            obs_traj[t,0,:] = torch.Tensor([1.2 - 0.1*t, 0])
+            obs_traj[t,0,:] = torch.Tensor([1.1 - 0.1*t, 0])
             pred_traj_gt[t,0,:] = torch.Tensor([-0.5,0])#([0.2 - 0.1*t, - 0.01*t])
+            '''
+            obs_traj[t,1,:] = torch.Tensor([-0.7 + 0.1*t, 0.05])
+            obs_traj[t,2,:] = torch.Tensor([-0.7 + 0.1*t, 0.1*4])
+            obs_traj[t,3,:] = torch.Tensor([-0.7+ 0.1*t, 0.15*4])
+            obs_traj[t,4,:] = torch.Tensor([1.0 - 0.1*t, -0.1*2])
+            obs_traj[t,5,:] = torch.Tensor([1.0 - 0.1*t, -0.2*3])
+            obs_traj[t,6,:] = torch.Tensor([1.0 - 0.1*t, -0.15*2])
+            
+            pred_traj_gt[t,1,:] = torch.Tensor([0.1 + 0.1*t, 0.05])
+            pred_traj_gt[t,2,:] = torch.Tensor([0.1 + 0.1*t, 0.1*4])
+            pred_traj_gt[t,3,:] = torch.Tensor([0.1 + 0.1*t, 0.15*4])
+            pred_traj_gt[t,4,:] = torch.Tensor([0.2 - 0.1*t, -0.1*2])
+            pred_traj_gt[t,5,:] = torch.Tensor([0.2 - 0.1*t, -0.2*3])
+            pred_traj_gt[t,6,:] = torch.Tensor([0.2 - 0.1*t, -0.15*2])
+            '''
             obs_traj[t,1,:] = torch.Tensor([-0.7 + 0.1*t, 0.1])
-            obs_traj[t,2,:] = torch.Tensor([-0.7 + 0.1*t, 0.15])
-            obs_traj[t,3,:] = torch.Tensor([-0.7+ 0.1*t, 0.2])
+            obs_traj[t,2,:] = torch.Tensor([-0.7 + 0.1*t, 0.2])
+            obs_traj[t,3,:] = torch.Tensor([-0.7+ 0.1*t, 0.3])
             obs_traj[t,4,:] = torch.Tensor([1.0 - 0.1*t, -0.1])
             obs_traj[t,5,:] = torch.Tensor([1.0 - 0.1*t, -0.2])
-            obs_traj[t,6,:] = torch.Tensor([1.0 - 0.1*t, -0.15])
+            obs_traj[t,6,:] = torch.Tensor([1.0 - 0.1*t, -0.3])
             
             pred_traj_gt[t,1,:] = torch.Tensor([0.1 + 0.1*t, 0.1])
-            pred_traj_gt[t,2,:] = torch.Tensor([0.1 + 0.1*t, 0.15])
-            pred_traj_gt[t,3,:] = torch.Tensor([0.1 + 0.1*t, 0.2])
+            pred_traj_gt[t,2,:] = torch.Tensor([0.1 + 0.1*t, 0.2])
+            pred_traj_gt[t,3,:] = torch.Tensor([0.1 + 0.1*t, 0.3])
             pred_traj_gt[t,4,:] = torch.Tensor([0.2 - 0.1*t, -0.1])
             pred_traj_gt[t,5,:] = torch.Tensor([0.2 - 0.1*t, -0.2])
-            pred_traj_gt[t,6,:] = torch.Tensor([0.2 - 0.1*t, -0.15])
+            pred_traj_gt[t,6,:] = torch.Tensor([0.2 - 0.1*t, -0.15*2])
                                       
         obs_traj_rel = obs_traj - obs_traj[0,:,:]
         goals[0,0,:] =  torch.Tensor([-0.5,0])
@@ -240,11 +281,39 @@ def main(args):
         goals[0,6,:] =  torch.Tensor([1.5,-0.3])
     
         goals_rel = goals - obs_traj[0,:,:]
-        seq_start_end = torch.Tensor([[0,7]]).to(torch.int64).cuda()
-        
+        seq_start_end = torch.Tensor([[0,num_ped]]).to(torch.int64).cuda()
+        if _args.delta is True:
+            model=svm_load_model('//data/xinjiey/Group_Navi_GAN/spencer/group/social_relationships/groups_probabilistic_small.model')
+    
+            end_pos = obs_traj_rel[-1, :, :]
+
+            # r1,r1,r1, r2,r2,r2, r3,r3,r3 - r1,r2,r3, r1,r2,r3, r1,r2,r3
+            end_pos_difference = row_repeat(end_pos, num_ped) - end_pos.repeat(num_ped, 1)
+            end_displacement = obs_traj_rel[-1,:,:] - obs_traj_rel[-2,:,:] / 0.4
+            end_speed = torch.sqrt(torch.sum(end_displacement**2, dim=1)).view(-1,1)
+
+            end_speed_difference =  row_repeat(end_speed, num_ped) - end_speed.repeat(num_ped, 1)
+            end_heading = torch.atan2(end_displacement[:,0], end_displacement[:,1]).view(-1,1)
+            end_heading_difference =  row_repeat(end_heading, num_ped) - end_heading.repeat(num_ped, 1)
+            # num_ped**2
+            delta_distance = torch.sqrt(torch.sum(end_pos_difference**2, dim=1)).view(-1,1)
+            # num_ped
+            delta_speed = torch.abs(end_speed_difference)
+            delta_heading = torch.abs(torch.atan2(torch.sin(end_heading_difference), torch.cos(end_heading_difference)))
+
+            _x = torch.cat((delta_distance, delta_speed, delta_heading),1)
+            _, _, prob = svm_predict([], _x.tolist(), model,'-b 1 -q')
+            prob = torch.FloatTensor(prob)[:,0]
+            #positive prob >0.5 consider group relationship 
+            obs_delta[3, :, :num_ped] = (prob>0.5).long().view(num_ped, num_ped)
+            obs_delta[0, :, :num_ped] = delta_distance.view(num_ped, num_ped)
+            obs_delta[1, :, :num_ped] = delta_speed.view(num_ped, num_ped)
+            obs_delta[2, :, :num_ped] = delta_heading.view(num_ped, num_ped)
+            print(obs_delta[3, :, :num_ped])
+
         
         evaluate(    
-            _args, obs_traj, obs_traj_rel, pred_traj_gt, seq_start_end, goals, goals_rel, attention_generator, discriminator,
+            _args, obs_traj, obs_traj_rel, pred_traj_gt, seq_start_end, goals, goals_rel, obs_delta, attention_generator, discriminator,
            plot_dir=args.plot_dir)
         
         #print(' Pred Len: {}, ADE: {:.2f}, FDE: {:.2f}'.format(_args.pred_len, ade, fde))

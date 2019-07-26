@@ -248,6 +248,7 @@ class PoolHiddenNet(nn.Module):
     def get_heading_difference(self, obs_traj_rel, _start, _end, dim):
         start = _start
         end = _end
+        
         heading_mask = nn.init.eye_(torch.empty(end-start, end-start))
         delta_x = obs_traj_rel[0,start:end, 0]  - obs_traj_rel[-1,start:end, 0] 
         delta_y = obs_traj_rel[0,start:end, 1]  - obs_traj_rel[-1,start:end, 1] 
@@ -256,7 +257,10 @@ class PoolHiddenNet(nn.Module):
             for p in range(t+1, end-start):
                 angle = abs(torch.atan2(torch.sin(theta[t]-theta[p]), torch.cos(theta[t]-theta[p])))
                 heading_mask[t,p] = heading_mask[p,t] =torch.cos(angle)
+        
         mask = heading_mask.unsqueeze(2).repeat(1,1,dim).cuda()
+        
+        
         return mask
 
     def forward(self, h_states, seq_start_end, end_pos, obs_traj_rel=None, _obs_delta_poolnet=None):
@@ -288,11 +292,13 @@ class PoolHiddenNet(nn.Module):
 
             #heading_mask
             if self.group_pooling is True:
-                assert _obs_delta_poolnet is not None
+                
                 #mask = self.get_heading_difference(obs_traj_rel, start, end, self.bottleneck_dim)
-               # print(_obs_delta_poolnet[3,start:end,0:num_ped].size())
-                mask = _obs_delta_poolnet[3,start:end,0:num_ped].unsqueeze(2).repeat(1,1,self.bottleneck_dim)
-                #print(mask.size())
+                assert _obs_delta_poolnet is not None
+                tracked_heading = _obs_delta_poolnet[3,start:end,0:num_ped] * torch.cos(_obs_delta_poolnet[2,start:end,0:num_ped])
+                mask = tracked_heading.unsqueeze(2).repeat(1,1,self.bottleneck_dim)
+                
+               
             else:
                 mask = torch.ones(num_ped, num_ped,self.bottleneck_dim).cuda()
 
@@ -901,6 +907,7 @@ class LateAttentionFullGenerator(nn.Module):
         Output:
         - pred_traj_rel: Tensor of shape (self.pred_len, batch, 2)
         """
+        
         batch_size = obs_traj_rel.size(1)
         # Encode seq
         force_final_encoder_h = self.force_encoder(obs_traj_rel)

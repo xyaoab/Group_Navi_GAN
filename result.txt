@@ -24,15 +24,20 @@ Dataset: zara1, Pred Len: 8, D_real: 0.32/0.32, D_fake: 0.32/0.32
 1 sample
 Dataset: zara1, Pred Len: 8, ADE: 0.30, FDE: 0.80
 Dataset: zara1, Pred Len: 8, D_real: 0.11/0.11, D_fake: 0.11/0.12
-
-
+##############
+##############
 /headingloss_zara1_batch32_epoch500_spool_with_model.pt
 20 samples
 Dataset: zara1, Pred Len: 8, ADE: 0.35, FDE: 0.89
 Dataset: zara1, Pred Len: 8, D_real: 0.11/0.11, D_fake: 0.11/0.12
 
 ################
-
+/groupnet_zara1_batch32_epoch500_poolnet_with_model.pt
 20 samples 
 Dataset: zara1, Pred Len: 8, ADE: 0.25, FDE: 0.54
 Dataset: zara1, Pred Len: 8, D_real: 0.56/0.17, D_fake: 0.56/0.17
+##############
+################
+/svmgroup_zara1_batch32_epoch500_poolnet_with_model.pt
+Dataset: zara1, Pred Len: 8, ADE: 0.24, FDE: 0.61
+##############

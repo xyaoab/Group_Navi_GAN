@@ -69,7 +69,7 @@ def get_attention_generator(checkpoint, best=False):
         noise_type=args.noise_type,
         noise_mix_type=args.noise_mix_type,
         pooling_type=args.pooling_type,
-        group_pooling=agrs.group_pooling,
+        group_pooling=args.group_pooling,
         pool_every_timestep=args.pool_every_timestep,
         dropout=args.dropout,
         bottleneck_dim=args.bottleneck_dim,
@@ -131,7 +131,7 @@ def evaluate(
 
             for sample in range(num_samples):
                 
-                if args.group_pooling is True:
+                if args.delta is True:
                     pred_traj_fake_rel, _ = attention_generator(
                         obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = obs_delta, seq_len=attention_generator.pred_len, goal_input=goals_rel
                     )
@@ -255,6 +255,10 @@ def main(args):
         discriminator = get_discriminator(checkpoint)
         _args = AttrDict(checkpoint['args'])
         path = get_dset_path(_args.dataset_name, args.dset_type)
+        try:
+            _args.delta
+        except AttributeError:
+             _args.delta = False
         _, loader = data_loader(_args, path, shuffle=False, delta=_args.delta)
         ade, fde, mean_d_real, std_d_real, mean_d_fake, std_d_fake = evaluate(    
             _args, loader, attention_generator, discriminator,

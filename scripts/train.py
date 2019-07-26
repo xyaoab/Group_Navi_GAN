@@ -520,8 +520,16 @@ def generator_step(
         for _ in range(args.best_k):
             gt_rel = None
             
-            pred_traj_fake_rel, _ = attention_generator(obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in=obs_delta, seq_len=pred_len, goal_input=goals_rel, gt_rel=gt_rel)
-            #logger.info('[after flipping] obs_traj: {}; pred_traj_fake_rel: {}'.format(obs_traj.size(0), pred_traj_fake_rel.size(0)))
+            if args.delta is True:
+                pred_traj_fake_rel, _ = attention_generator(
+                    obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = obs_delta, seq_len=pred_len, goal_input=goals_rel
+                )
+            else:
+                pred_traj_fake_rel, _ = attention_generator(
+                    obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = None, seq_len=pred_len, goal_input=goals_rel
+                )
+
+            #logger.info('[after flipping] obs_traj: {}; pred_traj_fake_rel: {}; pred_traj_gt_rel:{}'.format(obs_traj.size(0), pred_traj_fake_rel.size(0), pred_traj_gt_rel.size(0)))
             pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
 
             # Optimize delta position instead of whole trajectory
@@ -536,7 +544,11 @@ def generator_step(
                 for start, end in seq_start_end.data:
                     count = pred_traj_gt.size(0)
                     if args.resist_loss_heading == 1:
-                        heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
+                        if args.delta is True:
+                            heading_mask = torch.cos(obs_delta[2,start.item():end.item(),0:(end-start).item()])
+                            heading_mask = heading_mask.unsqueeze(0).repeat(count,1,1)
+                        else:
+                            heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
                     for t in range(start, end):
                         if t == start:
                             distance = pred_traj_gt[:,t+1:end,:].clone()
@@ -649,7 +661,11 @@ def check_accuracy(
             for start, end in seq_start_end.data:
                 count = pred_traj_gt.size(0)
                 if args.resist_loss_heading == 1:
-                    heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
+                    if args.delta is True:
+                        heading_mask = torch.cos(obs_delta[2,start.item():end.item(),0:(end-start).item()])
+                        heading_mask = heading_mask.unsqueeze(0).repeat(count,1,1)
+                    else:
+                        heading_mask  = get_heading_difference(obs_traj_rel, count, start, end).cuda()
                 for t in range(start, end):
                     if t == start:
                         distance = pred_traj_gt[:,t+1:end,:].clone()
