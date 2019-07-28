@@ -57,6 +57,14 @@ def get_discriminator(checkpoint, best=False):
 # For late attent model by full state
 def get_attention_generator(checkpoint, best=False):
     args = AttrDict(checkpoint['args'])
+    try:
+        args.delta
+    except AttributeError:
+         args.delta = False
+    try:
+        args.group_pooling
+    except AttributeError:
+        args.group_pooling = False
     generator = LateAttentionFullGenerator(
         goal_dim=(2,),
         obs_len=args.obs_len,
@@ -228,20 +236,26 @@ def main(args):
         _args = AttrDict(checkpoint['args'])
         try:
             _args.delta
+            
         except AttributeError:
              _args.delta = False
+        try:
+            _args.group_pooling
+        except AttributeError:
+            _args.group_pooling = False
         num_ped =7
-        obs_traj = torch.ones([8, num_ped, 2], dtype=torch.float32).cuda()
+        len_pred = 8
+        obs_traj = torch.ones([len_pred, num_ped, 2], dtype=torch.float32).cuda()
 
-        obs_traj_rel = torch.ones([8, num_ped, 2], dtype=torch.float32).cuda()
-        pred_traj_gt = torch.ones([8, num_ped, 2], dtype=torch.float32).cuda()
+        obs_traj_rel = torch.ones([len_pred, num_ped, 2], dtype=torch.float32).cuda()
+        pred_traj_gt = torch.ones([len_pred, num_ped, 2], dtype=torch.float32).cuda()
         goals = torch.ones([1, num_ped, 2], dtype=torch.float32).cuda()
         goals_rel = torch.ones([1, num_ped, 2], dtype=torch.float32).cuda()
         obs_delta = torch.zeros([4, num_ped, num_ped], dtype=torch.float32).cuda()
         
-        for t in range(8):
-            obs_traj[t,0,:] = torch.Tensor([1.1 - 0.1*t, 0])
-            pred_traj_gt[t,0,:] = torch.Tensor([-0.5,0])#([0.2 - 0.1*t, - 0.01*t])
+        for t in range(len_pred):
+            obs_traj[t,0,:] = torch.Tensor([5 - 0.5*t, 0])
+            pred_traj_gt[t,0,:] = torch.Tensor([0.2,0])#([0.2 - 0.1*t, - 0.01*t])
             '''
             obs_traj[t,1,:] = torch.Tensor([-0.7 + 0.1*t, 0.05])
             obs_traj[t,2,:] = torch.Tensor([-0.7 + 0.1*t, 0.1*4])
@@ -257,22 +271,22 @@ def main(args):
             pred_traj_gt[t,5,:] = torch.Tensor([0.2 - 0.1*t, -0.2*3])
             pred_traj_gt[t,6,:] = torch.Tensor([0.2 - 0.1*t, -0.15*2])
             '''
-            obs_traj[t,1,:] = torch.Tensor([-0.7 + 0.1*t, 0.1])
-            obs_traj[t,2,:] = torch.Tensor([-0.7 + 0.1*t, 0.2])
-            obs_traj[t,3,:] = torch.Tensor([-0.7+ 0.1*t, 0.3])
-            obs_traj[t,4,:] = torch.Tensor([1.0 - 0.1*t, -0.1])
-            obs_traj[t,5,:] = torch.Tensor([1.0 - 0.1*t, -0.2])
-            obs_traj[t,6,:] = torch.Tensor([1.0 - 0.1*t, -0.3])
+            obs_traj[t,1,:] = torch.Tensor([-11 + 0.6*t, -0.1])
+            obs_traj[t,2,:] = torch.Tensor([-11 + 0.6*t, 0.4])
+            obs_traj[t,3,:] = torch.Tensor([-11+ 0.6*t, 1])
+            obs_traj[t,4,:] = torch.Tensor([4.8 - 0.6*t, -0.5])
+            obs_traj[t,5,:] = torch.Tensor([4.8 - 0.6*t, -1])
+            obs_traj[t,6,:] = torch.Tensor([4.8 - 0.6*t, -1.5])
             
-            pred_traj_gt[t,1,:] = torch.Tensor([0.1 + 0.1*t, 0.1])
-            pred_traj_gt[t,2,:] = torch.Tensor([0.1 + 0.1*t, 0.2])
-            pred_traj_gt[t,3,:] = torch.Tensor([0.1 + 0.1*t, 0.3])
-            pred_traj_gt[t,4,:] = torch.Tensor([0.2 - 0.1*t, -0.1])
-            pred_traj_gt[t,5,:] = torch.Tensor([0.2 - 0.1*t, -0.2])
-            pred_traj_gt[t,6,:] = torch.Tensor([0.2 - 0.1*t, -0.15*2])
+            pred_traj_gt[t,1,:] = torch.Tensor([-11+0.6*8 + 0.6*t, -0.1])
+            pred_traj_gt[t,2,:] = torch.Tensor([-11+0.6*8 + 0.6*t, 0.4])
+            pred_traj_gt[t,3,:] = torch.Tensor([-11+0.6*8 + 0.6*t, 1])
+            pred_traj_gt[t,4,:] = torch.Tensor([ - 0.6*t, -0.5])
+            pred_traj_gt[t,5,:] = torch.Tensor([ - 0.6*t, -1])
+            pred_traj_gt[t,6,:] = torch.Tensor([ - 0.6*t, -1.5])
                                       
         obs_traj_rel = obs_traj - obs_traj[0,:,:]
-        goals[0,0,:] =  torch.Tensor([-0.5,0])
+        goals[0,0,:] =  torch.Tensor([5-0.5*16,0])
         goals[0,1,:] =  torch.Tensor([1.5,0.1])
         goals[0,2,:] =  torch.Tensor([1.5,0])
         goals[0,3,:] =  torch.Tensor([1.5,0.2])

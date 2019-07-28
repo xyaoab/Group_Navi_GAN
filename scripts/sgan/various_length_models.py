@@ -295,7 +295,8 @@ class PoolHiddenNet(nn.Module):
                 
                 #mask = self.get_heading_difference(obs_traj_rel, start, end, self.bottleneck_dim)
                 assert _obs_delta_poolnet is not None
-                tracked_heading = _obs_delta_poolnet[3,start:end,0:num_ped] * torch.cos(_obs_delta_poolnet[2,start:end,0:num_ped])
+                tracked_heading = _obs_delta_poolnet[3,start:end,0:num_ped] * torch.abs(torch.sin(_obs_delta_poolnet[2,start:end,0:num_ped]))
+                #* torch.cos(_obs_delta_poolnet[2,start:end,0:num_ped])
                 mask = tracked_heading.unsqueeze(2).repeat(1,1,self.bottleneck_dim)
                 
                

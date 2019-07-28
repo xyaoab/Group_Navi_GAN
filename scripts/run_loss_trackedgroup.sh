@@ -4,7 +4,7 @@ python3 scripts/train.py \
   --delim tab \
   --loader_num_workers 8 \
   --d_type 'local' \
-  --pred_len 8 \
+  --pred_len 12 \
   --encoder_h_dim_g 32 \
   --encoder_h_dim_d 64\
   --decoder_h_dim 32 \
@@ -35,13 +35,13 @@ python3 scripts/train.py \
   --clipping_threshold_g 1.5 \
   --best_k 1 \
   --gpu_num 0 \
-  --checkpoint_name trackedgroup_headingloss_zara1_batch64_epoch500_poolnet \
-  --restore_from_checkpoint 0 \
+  --checkpoint_name svmgroup_different_zara1_batch64_epoch500_pred12_poolnet \
+  --restore_from_checkpoint 1 \
   --output_dir './models' \
   --benchmark True \
   --spatial_dim True \
   --resist_loss_weight 1 \
-  --resist_loss_heading 1 \
+  --resist_loss_heading 0 \
   --delta True \
   --group_pooling True \
-  2>&1 | tee training_trackedgroup_headingloss__batch64_epoch500_poolnet.log
+  2>&1 | tee training_svmgroup_headingloss__batch64_epoch500_pred12_poolnet.log

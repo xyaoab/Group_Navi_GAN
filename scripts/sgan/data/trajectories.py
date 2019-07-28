@@ -108,7 +108,7 @@ def seq_delta_collate(data):
         _, _, prob = svm_predict([], _x.tolist(), model,'-b 1 -q')
         prob = torch.FloatTensor(prob)[:,0]
         #positive prob >0.5 consider group relationship 
-        obs_delta[3, start:end, :num_ped] = (prob>0.5).long().view(num_ped, num_ped)
+        obs_delta[3, start:end, :num_ped] = (prob<=0.5).long().view(num_ped, num_ped)
         obs_delta[0, start:end, :num_ped] = delta_distance.view(num_ped, num_ped)
         obs_delta[1, start:end, :num_ped] = delta_speed.view(num_ped, num_ped)
         obs_delta[2, start:end, :num_ped] = delta_heading.view(num_ped, num_ped)
