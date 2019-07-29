@@ -255,6 +255,7 @@ def main(args):
         discriminator = get_discriminator(checkpoint)
         _args = AttrDict(checkpoint['args'])
         path = get_dset_path(_args.dataset_name, args.dset_type)
+
         try:
             _args.delta
         except AttributeError:

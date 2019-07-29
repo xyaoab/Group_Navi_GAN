@@ -54,6 +54,7 @@ Dataset: zara1, Pred Len: 8, ADE: 0.24, FDE: 0.61
 ################
 /svmgroup_different_zara1_batch64_epoch500_poolnet_with_model.pt (svm mask only)
 Dataset: zara1, Pred Len: 8, ADE: 0.27, FDE: 0.63
+Dataset: zara1, Pred Len: 12, ADE: 0.52, FDE: 1.28
 
 ################
 /trackedgroup_zara1_batch64_epoch500_poolnet_with_model.pt   (svm*cos(heading difference))
@@ -62,6 +63,9 @@ Dataset: zara1, Pred Len: 8, ADE: 0.21, FDE: 0.40
 pred-12
 Dataset: zara1, Pred Len: 12, ADE: 0.39, FDE: 1.08
 ################
+/trackedgroup_different_zara1_batch64_epoch500_poolnet_with_model.pt   (svm*sin(heading difference))
+Dataset: zara1, Pred Len: 8, ADE: 0.24, FDE: 0.49
+
 
 ################
 /trackedgroup_headingloss_zara1_batch64_epoch500_poolnet_with_model.pt

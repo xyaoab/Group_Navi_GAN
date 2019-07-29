@@ -243,7 +243,7 @@ def main(args):
             _args.group_pooling
         except AttributeError:
             _args.group_pooling = False
-        num_ped =7
+        num_ped = 10
         len_pred = 8
         obs_traj = torch.ones([len_pred, num_ped, 2], dtype=torch.float32).cuda()
 
@@ -270,7 +270,9 @@ def main(args):
             pred_traj_gt[t,4,:] = torch.Tensor([0.2 - 0.1*t, -0.1*2])
             pred_traj_gt[t,5,:] = torch.Tensor([0.2 - 0.1*t, -0.2*3])
             pred_traj_gt[t,6,:] = torch.Tensor([0.2 - 0.1*t, -0.15*2])
-            '''
+            #another finetune 
+            obs_traj[t,0,:] = torch.Tensor([5 - 0.5*t, 0])
+            pred_traj_gt[t,0,:] = torch.Tensor([0.2,0])#([0.2 - 0.1*t, - 0.01*t])
             obs_traj[t,1,:] = torch.Tensor([-11 + 0.6*t, -0.1])
             obs_traj[t,2,:] = torch.Tensor([-11 + 0.6*t, 0.4])
             obs_traj[t,3,:] = torch.Tensor([-11+ 0.6*t, 1])
@@ -284,15 +286,34 @@ def main(args):
             pred_traj_gt[t,4,:] = torch.Tensor([ - 0.6*t, -0.5])
             pred_traj_gt[t,5,:] = torch.Tensor([ - 0.6*t, -1])
             pred_traj_gt[t,6,:] = torch.Tensor([ - 0.6*t, -1.5])
+                    obs_traj_rel = obs_traj - obs_traj[0,:,:]
+        goals[0,0,:] =  torch.Tensor([5-0.5*16,0])
+            '''
+            obs_traj[t,1,:] = torch.Tensor([-11 + 0.6*t, -0.1])
+            obs_traj[t,2,:] = torch.Tensor([-11 + 0.6*t, 0.4])
+            obs_traj[t,3,:] = torch.Tensor([-11+ 0.6*t, 1])
+            obs_traj[t,4,:] = torch.Tensor([4.8 - 0.6*t, -0.5])
+            obs_traj[t,5,:] = torch.Tensor([4.8 - 0.6*t, -1])
+            obs_traj[t,6,:] = torch.Tensor([4.8 - 0.6*t, -1.5])
+
+            obs_traj[t,7,:] = torch.Tensor([8 - 0.7*t, -0.5])
+            obs_traj[t,8,:] = torch.Tensor([8 - 0.7*t, -1])
+            obs_traj[t,9,:] = torch.Tensor([8 - 0.7*t, -1.5])
+            
+            pred_traj_gt[t,1,:] = torch.Tensor([-11+0.6*8 + 0.6*t, -0.1])
+            pred_traj_gt[t,2,:] = torch.Tensor([-11+0.6*8 + 0.6*t, 0.4])
+            pred_traj_gt[t,3,:] = torch.Tensor([-11+0.6*8 + 0.6*t, 1])
+            pred_traj_gt[t,4,:] = torch.Tensor([ - 0.6*t, -0.5])
+            pred_traj_gt[t,5,:] = torch.Tensor([ - 0.6*t, -1])
+            pred_traj_gt[t,6,:] = torch.Tensor([ - 0.6*t, -1.5])
+            
+            pred_traj_gt[t,7,:] = torch.Tensor([ 2.4- 0.7*t, -0.5])
+            pred_traj_gt[t,8,:] = torch.Tensor([ 2.4- 0.7*t, -1])
+            pred_traj_gt[t,9,:] = torch.Tensor([ 2.4- 0.7*t, -1.5])
                                       
         obs_traj_rel = obs_traj - obs_traj[0,:,:]
         goals[0,0,:] =  torch.Tensor([5-0.5*16,0])
-        goals[0,1,:] =  torch.Tensor([1.5,0.1])
-        goals[0,2,:] =  torch.Tensor([1.5,0])
-        goals[0,3,:] =  torch.Tensor([1.5,0.2])
-        goals[0,4,:] =  torch.Tensor([1.5,-0.1])
-        goals[0,5,:] =  torch.Tensor([1.5,-0.2])
-        goals[0,6,:] =  torch.Tensor([1.5,-0.3])
+
     
         goals_rel = goals - obs_traj[0,:,:]
         seq_start_end = torch.Tensor([[0,num_ped]]).to(torch.int64).cuda()
