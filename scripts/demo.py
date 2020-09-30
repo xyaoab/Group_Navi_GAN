@@ -13,12 +13,9 @@ import matplotlib.pyplot as plt
 from attrdict import AttrDict
 torch.backends.cudnn.benchmark = True
 
-from sgan.data.loader import data_loader
 
-
-path = '/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/libsvm'
-sys.path.append(path)
-from svmutil import *
+# ! pip install libsvm
+from libsvm.svmutil import *
 
 from sgan.various_length_models import TrajectoryDiscriminator,LateAttentionFullGenerator
 
@@ -32,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 parser.add_argument('--model_path', type=str)
 
-parser.add_argument('--plot_dir', default='./plots/interpretation/')
+parser.add_argument('--plot_dir', default='./plots/')
 
 def get_discriminator(checkpoint, best=False):
     args = AttrDict(checkpoint['args'])
@@ -141,6 +138,9 @@ def evaluate(
             pred_traj_fake_rel, _ = attention_generator(
                 obs_traj, obs_traj_rel, seq_start_end, _obs_delta_in = None, seq_len=attention_generator.pred_len, goal_input=goals_rel
             )
+        ######################################################
+        ###prediction from gan, [lens,agents,(x,y)coorindates]]############
+        ######################################################
         pred_traj_fake = relative_to_abs(pred_traj_fake_rel, obs_traj[0])
         #ade.append(displacement_error(pred_traj_fake, pred_traj_gt, mode='raw'))
         #fde.append(final_displacement_error(pred_traj_fake[-1], pred_traj_gt[-1], mode='raw'))
@@ -152,10 +152,22 @@ def evaluate(
                 os.makedirs(_plot_dir)
             fig = plt.figure()
             goal_point = goals[0,0, :]
-
+        ######################################################
+        ###prediction, [prediction lens+observation lens,agents,(x,y)coorindates]]############
+        ######################################################
             whole_traj_fake = torch.cat([obs_traj, pred_traj_fake], dim=0)
+
+            #####################
+            #robot prediction###
+            ####################
             whole_traj_fake = whole_traj_fake[:, 0, :]
+            ###############################
+            #ground truth for all agents###
+            ###############################
             whole_traj_gt = torch.cat([obs_traj, pred_traj_gt],dim=0)
+             ###############################
+             #ground truth for observed agents###
+            ###############################
             whole_traj_gt = whole_traj_gt[:, seq_start_end[0][0]:seq_start_end[0][1], :]
             y_upper_limit = max([torch.max(whole_traj_fake[:, 1]).data, 
                                  torch.max(whole_traj_gt[:, :, 1]).data,
@@ -178,7 +190,9 @@ def evaluate(
                 gt_points_x = whole_traj_gt[max(i-2, 0):i+1,:,0].cpu().numpy().flatten()
                 gt_points_y = whole_traj_gt[max(i-2, 0):i+1,:,1].cpu().numpy().flatten()
                 ax.plot(gt_points_x, gt_points_y, 'b.')
-
+                ###############################
+                #####just the robot############
+                ################################
                 fake_points_x = whole_traj_fake[max(i-2, 0):i+1,0].cpu().numpy()
                 fake_points_y = whole_traj_fake[max(i-2, 0):i+1,1].cpu().numpy()
                 if i >= args.obs_len:
@@ -186,8 +200,8 @@ def evaluate(
                 else:
                     ax.plot(fake_points_x, fake_points_y, 'g.')
 
-                ax.set_ylim(y_lower_limit, y_upper_limit)
-                ax.set_xlim(x_lower_limit, x_upper_limit)
+                ax.set_ylim(y_lower_limit.cpu().numpy(), y_upper_limit.cpu().numpy())
+                ax.set_xlim(x_lower_limit.cpu().numpy(), x_upper_limit.cpu().numpy())
 
                 fig.canvas.draw()
                 image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
@@ -245,10 +259,19 @@ def main(args):
             _args.group_pooling = False
         num_ped = 10
         len_pred = 8
+        ############################
+        ####### observation ########
+        ############################
         obs_traj = torch.ones([len_pred, num_ped, 2], dtype=torch.float32).cuda()
 
         obs_traj_rel = torch.ones([len_pred, num_ped, 2], dtype=torch.float32).cuda()
+        ############################
+        # prediction ground truth ##
+        ############################
         pred_traj_gt = torch.ones([len_pred, num_ped, 2], dtype=torch.float32).cuda()
+        ############################
+        # goal for predictive agent#
+        ############################
         goals = torch.ones([1, num_ped, 2], dtype=torch.float32).cuda()
         goals_rel = torch.ones([1, num_ped, 2], dtype=torch.float32).cuda()
         obs_delta = torch.zeros([4, num_ped, num_ped], dtype=torch.float32).cuda()
@@ -256,39 +279,7 @@ def main(args):
         for t in range(len_pred):
             obs_traj[t,0,:] = torch.Tensor([5 - 0.5*t, 0])
             pred_traj_gt[t,0,:] = torch.Tensor([0.2,0])#([0.2 - 0.1*t, - 0.01*t])
-            '''
-            obs_traj[t,1,:] = torch.Tensor([-0.7 + 0.1*t, 0.05])
-            obs_traj[t,2,:] = torch.Tensor([-0.7 + 0.1*t, 0.1*4])
-            obs_traj[t,3,:] = torch.Tensor([-0.7+ 0.1*t, 0.15*4])
-            obs_traj[t,4,:] = torch.Tensor([1.0 - 0.1*t, -0.1*2])
-            obs_traj[t,5,:] = torch.Tensor([1.0 - 0.1*t, -0.2*3])
-            obs_traj[t,6,:] = torch.Tensor([1.0 - 0.1*t, -0.15*2])
             
-            pred_traj_gt[t,1,:] = torch.Tensor([0.1 + 0.1*t, 0.05])
-            pred_traj_gt[t,2,:] = torch.Tensor([0.1 + 0.1*t, 0.1*4])
-            pred_traj_gt[t,3,:] = torch.Tensor([0.1 + 0.1*t, 0.15*4])
-            pred_traj_gt[t,4,:] = torch.Tensor([0.2 - 0.1*t, -0.1*2])
-            pred_traj_gt[t,5,:] = torch.Tensor([0.2 - 0.1*t, -0.2*3])
-            pred_traj_gt[t,6,:] = torch.Tensor([0.2 - 0.1*t, -0.15*2])
-            #another finetune 
-            obs_traj[t,0,:] = torch.Tensor([5 - 0.5*t, 0])
-            pred_traj_gt[t,0,:] = torch.Tensor([0.2,0])#([0.2 - 0.1*t, - 0.01*t])
-            obs_traj[t,1,:] = torch.Tensor([-11 + 0.6*t, -0.1])
-            obs_traj[t,2,:] = torch.Tensor([-11 + 0.6*t, 0.4])
-            obs_traj[t,3,:] = torch.Tensor([-11+ 0.6*t, 1])
-            obs_traj[t,4,:] = torch.Tensor([4.8 - 0.6*t, -0.5])
-            obs_traj[t,5,:] = torch.Tensor([4.8 - 0.6*t, -1])
-            obs_traj[t,6,:] = torch.Tensor([4.8 - 0.6*t, -1.5])
-            
-            pred_traj_gt[t,1,:] = torch.Tensor([-11+0.6*8 + 0.6*t, -0.1])
-            pred_traj_gt[t,2,:] = torch.Tensor([-11+0.6*8 + 0.6*t, 0.4])
-            pred_traj_gt[t,3,:] = torch.Tensor([-11+0.6*8 + 0.6*t, 1])
-            pred_traj_gt[t,4,:] = torch.Tensor([ - 0.6*t, -0.5])
-            pred_traj_gt[t,5,:] = torch.Tensor([ - 0.6*t, -1])
-            pred_traj_gt[t,6,:] = torch.Tensor([ - 0.6*t, -1.5])
-                    obs_traj_rel = obs_traj - obs_traj[0,:,:]
-        goals[0,0,:] =  torch.Tensor([5-0.5*16,0])
-            '''
             obs_traj[t,1,:] = torch.Tensor([-11 + 0.6*t, -0.1])
             obs_traj[t,2,:] = torch.Tensor([-11 + 0.6*t, 0.4])
             obs_traj[t,3,:] = torch.Tensor([-11+ 0.6*t, 1])
@@ -318,7 +309,7 @@ def main(args):
         goals_rel = goals - obs_traj[0,:,:]
         seq_start_end = torch.Tensor([[0,num_ped]]).to(torch.int64).cuda()
         if _args.delta is True:
-            model=svm_load_model('//data/xinjiey/Group_Navi_GAN/spencer/group/social_relationships/groups_probabilistic_small.model')
+            model=svm_load_model('../spencer/group/social_relationships/groups_probabilistic_small.model')
     
             end_pos = obs_traj_rel[-1, :, :]
 
@@ -344,7 +335,7 @@ def main(args):
             obs_delta[0, :, :num_ped] = delta_distance.view(num_ped, num_ped)
             obs_delta[1, :, :num_ped] = delta_speed.view(num_ped, num_ped)
             obs_delta[2, :, :num_ped] = delta_heading.view(num_ped, num_ped)
-            print(obs_delta[3, :, :num_ped])
+            #print(obs_delta[3, :, :num_ped])
 
         
         evaluate(    

@@ -8,9 +8,7 @@ import torch
 from torch.utils.data import Dataset
 import sys
 logger = logging.getLogger(__name__)
-path = '/data/xinjiey/Group_Navi_GAN/env/lib/python3.5/site-packages/libsvm'
-sys.path.append(path)
-from svmutil import *
+from libsvm.svmutil import *
 
 def seq_collate(data):
     (obs_seq_list, pred_seq_list, obs_seq_rel_list, pred_seq_rel_list,
